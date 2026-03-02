@@ -1,5 +1,5 @@
 # 🏦 Gozar Capital - Sistema de Gestión de Préstamos
-Gozar Capital es una aplicación fintech de última generación diseñada para la gestión eficiente de préstamos personales. El sistema permite el registro de clientes, la creación de cronogramas de pago (diarios/semanales) y el seguimiento de cuotas en tiempo real, todo bajo una interfaz premium inspirada en los estándares bancarios del BBVA 2026.
+Gozar Capital es una aplicación fintech de última generación diseñada para la gestión eficiente de préstamos personales. El sistema permite el registro de clientes, la creación de cronogramas de pago (diarios/semanales) y el seguimiento de cuotas en tiempo real, todo bajo una interfaz premium inspirada en los estándares bancarios.
 
 ## 🚀 Tecnologías y Versiones
 Este frontend ha sido construido con las herramientas más modernas del ecosistema web para garantizar velocidad y escalabilidad:
