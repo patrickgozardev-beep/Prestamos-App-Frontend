@@ -1,73 +1,52 @@
-# React + TypeScript + Vite
+# 🏦 Gozar Capital - Sistema de Gestión de Préstamos
+Gozar Capital es una aplicación fintech de última generación diseñada para la gestión eficiente de préstamos personales. El sistema permite el registro de clientes, la creación de cronogramas de pago (diarios/semanales) y el seguimiento de cuotas en tiempo real, todo bajo una interfaz premium inspirada en los estándares bancarios del BBVA 2026.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 Tecnologías y Versiones
+Este frontend ha sido construido con las herramientas más modernas del ecosistema web para garantizar velocidad y escalabilidad:
 
-Currently, two official plugins are available:
+React 18: Biblioteca principal para la construcción de interfaces de usuario.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+TypeScript: Tipado estático para un código robusto y libre de errores de ejecución.
 
-## React Compiler
+Vite 6: Tooling de última generación para un desarrollo ultra rápido y compilaciones optimizadas.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Chakra UI: Framework de componentes utilizado para la estructura base.
 
-## Expanding the ESLint configuration
+Phosphor Icons: Librería de iconos minimalistas para el look & feel financiero.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+React Router Dom: Gestión de navegación y parámetros de ruta.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🎨 Características de Diseño (UI/UX)
+El proyecto destaca por una personalización profunda de componentes para evitar el "look genérico":
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Custom Selects: Componentes de selección desarrollados desde cero para eliminar los menús nativos del navegador y el "focus" azul por defecto.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Estilo Bancario: Implementación de colores institucionales (#004481) y tipografías con alta jerarquía visual.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Mobile First: Optimizado específicamente para dispositivos móviles como el Redmi Note 14, garantizando que los inputs y botones sean fáciles de accionar.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🛠️ Lógica de Préstamos
+El sistema maneja flujos complejos de datos financieros:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Cálculo Dinámico: Generación de montos totales e intereses en tiempo real antes de confirmar el préstamo.
+
+Frecuencias Flexibles: Soporte para cobros diarios (ej. 24 cuotas) y semanales, con automatización de fechas de inicio.
+
+Resumen de Cuotas: Cálculo preciso de la cuota fija mediante lógica de intereses personalizada.
+
+## 💻 Configuración de Desarrollo
+Instalación
+Bash
+npm install
+Ejecución en modo desarrollo
+Bash
+npm run dev
+Construcción para producción
+Bash
+npm run build
+⚙️ Calidad de Código y Linting
+Para mantener un estándar de producción, hemos configurado ESLint con reglas estrictas de TypeScript:
+
+tseslint.configs.recommendedTypeChecked: Garantiza que los tipos sean consistentes en toda la app.
+
+eslint-plugin-react-x: Reglas específicas para el uso óptimo de hooks y componentes React.
