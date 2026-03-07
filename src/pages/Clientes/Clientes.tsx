@@ -13,29 +13,98 @@ import {
   import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, UserPlus, CaretRight, User } from "phosphor-react";
   import MainLayout from "../../layouts/MainLayout";
   import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Cliente } from "../../types/Cliente";
+import clienteService from "../../api/clienteService";
   
   const Clientes = () => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [selectedCliente, setSelectedCliente] = useState<any>(null);
   
+    // 1. Estados para los datos y la carga
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+
+    const fetchClientes = async () => {
+      try {
+        setLoading(true);
+        const data = await clienteService.listarPorUsuario(1);
+        setClientes(data);
+      } catch (error) {
+        console.error("Error al obtener mis clientes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    // 3. Efecto de carga inicial
+    useEffect(() => {
+      // Si el buscador está vacío, cargamos todos
+      if (searchTerm.trim() === "") {
+        fetchClientes();
+        return;
+      }
+
+      // 2. Creamos un temporizador (Debounce)
+      const delayDebounceFn = setTimeout(() => {
+        if (searchTerm.length >= 1) {
+          ejecutarBusqueda(searchTerm);
+        }
+      }, 500); // Espera medio segundo después de la última tecla
+
+      // 3. Limpiamos el temporizador si el usuario sigue escribiendo
+      return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+
+    // 4. La función que realmente consume la API
+    const ejecutarBusqueda = async (valor: string) => {
+      try {
+        setLoading(true);
+        const data = await clienteService.buscar(1, valor);
+        setClientes(data);
+      } catch (error) {
+        console.error("Error en búsqueda:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+    
+      // Si el usuario borra todo, volvemos a listar todos
+      if (value.trim() === "") {
+        fetchClientes();
+        return;
+      }
+    
+      // Buscamos si tiene al menos 1 carácter (puedes subirlo a 3 si prefieres)
+      if (value.length >= 1) {
+        try {
+          setLoading(true);
+          // Aquí usamos el ID del usuario (hardcoded a 1 por ahora como en tu ejemplo)
+          const filtered = await clienteService.buscar(1, value);
+          setClientes(filtered);
+        } catch (error) {
+          console.error("Error en la búsqueda:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
     const handleClienteClick = (cliente: any) => {
       setSelectedCliente(cliente);
       onOpen();
     };
-    // Datos de ejemplo que luego vendrán de tu API
-    const clientes = [
-      { id: 1, nombre: "Juan Pérez", dni: "726354XX", estado: "Activo", monto: "S/ 1,200" },
-      { id: 2, nombre: "María Rojas", dni: "092837XX", estado: "Pendiente", monto: "S/ 500" },
-      { id: 3, nombre: "Carlos Solis", dni: "453627XX", estado: "Mora", monto: "S/ 2,000" },
-    ];
-  
+
     return (
       <MainLayout>
         <VStack spacing={0} align="stretch" w="full" minH="100vh">
           
-          {/* Header de Navegación estilo BBVA */}
           <Flex align="center" py={4} px={2} bg="white" position="sticky" top={0} zIndex={10}>
             <IconButton
               icon={<CaretLeft size={24} weight="bold" />}
@@ -69,7 +138,9 @@ import { useState } from "react";
                 bg="gray.50" 
                 border="none" 
                 borderRadius="xl"
-                _focus={{ bg: "white", boxShadow: "outline" }}
+                value={searchTerm} 
+                onChange={handleSearch} 
+                _focus={{ bg: "white", boxShadow: "0 0 0 1px #004481" }}
               />
             </InputGroup>
           </Box>
@@ -95,7 +166,7 @@ import { useState } from "react";
                     </Box>
                     <VStack align="start" spacing={0}>
                       <Text fontWeight="bold" fontSize="sm" color="gray.700">
-                        {cliente.nombre}
+                        {cliente.nombres}
                       </Text>
                       <Text fontSize="xs" color="gray.500">
                         DNI: {cliente.dni}
@@ -106,7 +177,7 @@ import { useState } from "react";
                   <HStack spacing={4}>
                     <VStack align="end" spacing={0}>
                       <Text fontWeight="bold" fontSize="sm" color="#004481">
-                        {cliente.monto}
+                        {cliente.nombres}
                       </Text>
                       <Badge 
                         colorScheme={cliente.estado === "Mora" ? "red" : "green"} 
@@ -129,14 +200,14 @@ import { useState } from "react";
                   <ModalBody p={0}>
                     <VStack align="stretch" spacing={0}>
                       <Box p={5} borderBottom="1px solid" borderColor="gray.100">
-                        <Text fontWeight="900" color="#004481">{selectedCliente?.nombre}</Text>
+                        <Text fontWeight="900" color="#004481">{selectedCliente?.nombres}</Text>
                         <Text fontSize="xs" color="gray.500">¿Qué deseas realizar?</Text>
                       </Box>
                       
                       <Button 
                         variant="ghost" justifyContent="start" h="60px" borderRadius="0"
                         leftIcon={<Receipt size={24} weight="duotone" color="#004481" />}
-                        onClick={() => navigate(`/prestamos?clienteId=${selectedCliente.id}`)}
+                        onClick={() => navigate(`/prestamos?clienteId=${selectedCliente?.id}`)}
                       >
                         Ver Préstamos
                       </Button>
@@ -145,7 +216,7 @@ import { useState } from "react";
                         variant="ghost" justifyContent="start" h="60px" borderRadius="0"
                         borderBottomRadius="2xl"
                         leftIcon={<Info size={24} weight="duotone" color="#004481" />}
-                        onClick={() => navigate(`/clientes/detalle/${selectedCliente.id}`)}
+                        onClick={() => navigate(`/clientes/detalle/${selectedCliente?.id}`)}
                       >
                         Información del Cliente
                       </Button>
