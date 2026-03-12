@@ -1,60 +1,120 @@
-// Prestamos.tsx
-import { VStack, Text, Box, Flex, IconButton, Badge, HStack, Button, Spacer } from "@chakra-ui/react";
-import { CaretLeft, Plus, Funnel } from "phosphor-react";
+import { useEffect, useState } from "react";
+import { VStack, Text, Box, Flex, Badge, HStack, Button, Spacer, Spinner, Center, IconButton } from "@chakra-ui/react";
+import { CaretLeft, House, Plus } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import prestamoService from "../../api/prestamoService";
 
 const Prestamos = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clienteId = searchParams.get("clienteId");
+  const USUARIO_ID = 1; // ID del cobrador en sesión
+
+  const [prestamos, setPrestamos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        setLoading(true);
+        const data = clienteId 
+          ? await prestamoService.listarPorCliente(Number(clienteId))
+          : await prestamoService.listarPorUsuario(USUARIO_ID);
+        setPrestamos(data);
+      } catch (error) {
+        console.error("Error al cargar préstamos", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarDatos();
+  }, [clienteId]);
 
   return (
     <MainLayout>
       <VStack spacing={0} align="stretch" w="full" minH="100vh" bg="gray.50">
         <Flex align="center" py={4} px={2} bg="white" borderBottom="1px solid" borderColor="gray.100" position="sticky" top={0} zIndex={10}>
-          <IconButton icon={<CaretLeft size={24} weight="bold" />} variant="ghost" onClick={() => navigate("/clientes")} color="#004481" aria-label="Volver" />
-          <Text fontSize="lg" fontWeight="bold" color="#004481">Préstamos</Text>
+        <Box 
+          as="button" 
+          onClick={() => navigate(-1)} 
+          p={2} 
+          borderRadius="md" 
+          _hover={{ bg: "gray.100" }} 
+          _active={{ bg: "gray.200" }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <CaretLeft size={24} weight="bold" color="#004481" />
+        </Box>
+          <Text fontSize="lg" fontWeight="bold" color="#004481">
+            {clienteId ? "Préstamos del Cliente" : "Prestamos en General"}
+          </Text>
           <Spacer />
+          <Flex flex={1} justify="flex-end">
+              <IconButton
+                icon={<House size={24} weight="duotone" />}
+                colorScheme="blue"
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
+                aria-label="Agregar Cliente"
+              />
+          </Flex>
         </Flex>
 
         {clienteId && (
           <Box p={3} bg="blue.50" borderBottom="1px solid" borderColor="blue.100">
             <HStack justifyContent="space-between">
               <Text fontSize="xs" fontWeight="bold" color="#004481">FILTRADO POR CLIENTE #{clienteId}</Text>
-              <Button size="xs" variant="ghost" colorScheme="blue" onClick={() => navigate("/prestamos")}>Quitar filtro</Button>
+              <Button size="xs" colorScheme="blue" variant="link" onClick={() => navigate("/prestamos")}>Ver todos</Button>
             </HStack>
           </Box>
         )}
 
-        <VStack p={4} spacing={4}>
-          {/* Card de Préstamo */}
-          <Box w="full" p={5} bg="white" shadow="sm" borderRadius="2xl" border="1px solid" borderColor="gray.100">
-            <HStack justifyContent="space-between" mb={2}>
-              <Badge colorScheme="green" borderRadius="full" px={2}>AL DÍA</Badge>
-              <Text fontSize="xs" color="gray.400">#PR-9928</Text>
-            </HStack>
-            <Text fontSize="2xl" fontWeight="900" color="#004481">S/ 1,200.00</Text>
-            <HStack fontSize="sm" color="gray.600" spacing={1}>
-                <Text fontWeight="bold">Cuotas:</Text>
-                <Text>4 de 12 pagadas</Text>
-            </HStack>
-          </Box>
+        <VStack p={4} spacing={4} pb={24}>
+          {loading ? (
+            <Center h="200px"><Spinner color="#004481" /></Center>
+          ) : prestamos.map((p) => (
+            <Box 
+              key={p.id} 
+              w="full" 
+              p={5} 
+              bg="white" 
+              shadow="sm" 
+              borderRadius="2xl" 
+              border="1px solid" 
+              borderColor="gray.100"
+              cursor="pointer" // Cambia el cursor para indicar que es clickeable
+              _active={{ bg: "gray.50", transform: "scale(0.98)" }} // Efecto visual de presionar
+              transition="0.2s"
+              onClick={() => navigate(`/prestamos/${p.id}`)} // <--- AQUÍ llamas al detalle
+            >
+              <HStack justifyContent="space-between" mb={2}>
+                <Badge colorScheme={p.estado === 'ACTIVO' ? "green" : "gray"} borderRadius="full" px={2}>
+                  {p.estado}
+                </Badge>
+                <Text fontSize="xs" color="gray.400">#PR-{p.id}</Text>
+              </HStack>
+              
+              <Text fontSize="2xl" fontWeight="900" color="#004481">
+                S/ {p.monto.toFixed(2)}
+              </Text>
+              
+              <HStack justifyContent="space-between" mt={1}>
+                <Text fontSize="sm" color="gray.600">Cliente: {p.cliente?.nombres}</Text>
+                <Text fontSize="xs" color="blue.500" fontWeight="bold">Ver cuotas →</Text>
+              </HStack>
+            </Box>
+          ))}
         </VStack>
+
         <Button
-            position="fixed"
-            bottom="20px"
-            right="20px"
-            colorScheme="blue"
-            bg="#004481"
-            borderRadius="full"
-            size="lg"
-            leftIcon={<Plus weight="bold" />}
-            boxShadow="2xl"
-            onClick={() => navigate("/prestamos/nuevo")}
-          >
-            Nuevo
-          </Button>
+          position="fixed" bottom="20px" right="20px" bg="#004481" color="white"
+          borderRadius="full" size="lg" leftIcon={<Plus weight="bold" />}
+          boxShadow="2xl"
+          onClick={() => navigate(clienteId ? `/prestamos/nuevo?clienteId=${clienteId}` : "/prestamos/nuevo")}
+        />
       </VStack>
     </MainLayout>
   );

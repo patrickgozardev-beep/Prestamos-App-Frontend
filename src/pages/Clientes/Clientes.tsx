@@ -116,15 +116,7 @@ import clienteService from "../../api/clienteService";
             <Text fontSize="lg" fontWeight="bold" color="#004481" ml={2}>
               Mis Clientes
             </Text>
-            <Flex flex={1} justify="flex-end">
-              <IconButton
-                icon={<UserPlus size={24} weight="duotone" />}
-                colorScheme="blue"
-                variant="ghost"
-                onClick={() => navigate("/clientes/nuevo")}
-                aria-label="Agregar Cliente"
-              />
-            </Flex>
+
           </Flex>
   
           {/* Buscador */}

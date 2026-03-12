@@ -1,4 +1,4 @@
-export interface Cliente {
+export interface ClienteDTO {
     id?: number;
     nombres: string;
     dni: string;
