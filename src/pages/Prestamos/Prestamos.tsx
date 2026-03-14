@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { VStack, Text, Box, Flex, Badge, HStack, Button, Spacer, Spinner, Center, IconButton } from "@chakra-ui/react";
-import { CaretLeft, House, Plus } from "phosphor-react";
+import { VStack, Text, Box, Flex, Badge, HStack, Button, Spacer, Spinner, Center, IconButton, Icon } from "@chakra-ui/react";
+import { CaretLeft, House, Plus, Receipt } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import prestamoService from "../../api/prestamoService";
+import { formatearFecha } from "../../utils/funciones";
 
 const Prestamos = () => {
   const navigate = useNavigate();
@@ -73,9 +74,13 @@ const Prestamos = () => {
         )}
 
         <VStack p={4} spacing={4} pb={24}>
-          {loading ? (
-            <Center h="200px"><Spinner color="#004481" /></Center>
-          ) : prestamos.map((p) => (
+        {loading ? (
+          <Center h="200px">
+            <Spinner color="#004481" size="xl" thickness="4px" />
+          </Center>
+        ) : prestamos.length > 0 ? (
+          // LISTA DE PRÉSTAMOS (Si existen)
+          prestamos.map((p) => (
             <Box 
               key={p.id} 
               w="full" 
@@ -85,10 +90,10 @@ const Prestamos = () => {
               borderRadius="2xl" 
               border="1px solid" 
               borderColor="gray.100"
-              cursor="pointer" // Cambia el cursor para indicar que es clickeable
-              _active={{ bg: "gray.50", transform: "scale(0.98)" }} // Efecto visual de presionar
+              cursor="pointer"
+              _active={{ bg: "gray.50", transform: "scale(0.98)" }}
               transition="0.2s"
-              onClick={() => navigate(`/prestamos/${p.id}`)} // <--- AQUÍ llamas al detalle
+              onClick={() => navigate(`/prestamos/${p.id}`)}
             >
               <HStack justifyContent="space-between" mb={2}>
                 <Badge colorScheme={p.estado === 'ACTIVO' ? "green" : "gray"} borderRadius="full" px={2}>
@@ -102,11 +107,35 @@ const Prestamos = () => {
               </Text>
               
               <HStack justifyContent="space-between" mt={1}>
-                <Text fontSize="sm" color="gray.600">Cliente: {p.cliente?.nombres}</Text>
+                <VStack align="start" spacing={0}>
+                  <Text fontSize="sm" color="gray.600">Cliente: {p.cliente?.nombres}</Text>
+                  <Text fontSize="xs" color="gray.400">Inicio: {formatearFecha(p.fechaInicio)}</Text>
+                </VStack>
                 <Text fontSize="xs" color="blue.500" fontWeight="bold">Ver cuotas →</Text>
               </HStack>
             </Box>
-          ))}
+          ))
+        ) : (
+          // ESTADO VACÍO (Si no hay préstamos)
+          <Center flex={1} py={20} w="full">
+            <VStack spacing={4}>
+              <Box bg="blue.50" p={6} borderRadius="full">
+                {/* Usamos el icono de Receipt o Folder para indicar ausencia de registros */}
+                <Icon as={Receipt} size={60} color="#004481" weight="duotone" />
+              </Box>
+              <VStack spacing={1}>
+                <Text fontWeight="bold" fontSize="lg" color="gray.700">
+                  No hay préstamos
+                </Text>
+                <Text fontSize="sm" color="gray.500" textAlign="center" px={10}>
+                  {clienteId 
+                    ? "Este cliente aún no tiene créditos registrados en el sistema." 
+                    : "Aún no has registrado ningún préstamo para hoy."}
+                </Text>
+              </VStack>
+            </VStack>
+          </Center>
+        )}
         </VStack>
 
         <Button

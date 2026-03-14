@@ -3,21 +3,25 @@ import {
   FormLabel, Input, Button, InputGroup, InputLeftAddon, 
   Icon, Center, useDisclosure, Modal, ModalOverlay, 
   ModalContent, ModalHeader, ModalBody, ModalFooter, useToast,
-  FormErrorMessage
+  FormErrorMessage,
+  HStack
 } from "@chakra-ui/react";
-import { CaretLeft, CloudArrowUp, MapPin, CheckCircle } from "phosphor-react";
+import { CaretLeft, CloudArrowUp, MapPin, CheckCircle, Spinner } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import clienteService from "../../api/clienteService";
 import { soloNumeros, REGEX_DNI, REGEX_TELEFONO } from "../../utils/validaciones";
+import { FilePdf, Trash, FileArrowUp } from "phosphor-react";
+import { uploadToCloudinary } from "../../api/cloudinary/cloudinaryService";
 
 const NuevoCliente = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [loading, setLoading] = useState(false);
-
+  const [subiendoPdf, setSubiendoPdf] = useState(false);
+  const [nombreArchivo, setNombreArchivo] = useState("");
   // Estado del formulario
   const [formData, setFormData] = useState({
     nombres: "",
@@ -45,6 +49,51 @@ const NuevoCliente = () => {
       setFormData({ ...formData, [id]: numerico });
     } else {
       setFormData({ ...formData, [id]: value });
+    }
+  };
+
+  const handleFileChangeCloudinary = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    // Validación de peso máximo antes de subir (ej. 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Archivo muy pesado",
+        description: "El DNI no debe superar los 2MB.",
+        status: "error",
+      });
+      return;
+    }
+  
+    const formDataCloudinary = new FormData();
+    formDataCloudinary.append("file", file);
+    formDataCloudinary.append("upload_preset", "preset_dni");
+    
+
+    try {
+      setSubiendoPdf(true);
+      setNombreArchivo(file.name);
+      
+      const url = await uploadToCloudinary(file, 'dni');
+      
+      setFormData({ ...formData, dniPdf: url });
+      
+      toast({
+        title: "PDF Cargado",
+        description: "El documento se vinculó correctamente",
+        status: "success",
+        duration: 2000,
+      });
+    } catch (error) {
+      setNombreArchivo("");
+      toast({
+        title: "Error",
+        description: "No se pudo subir el PDF",
+        status: "error",
+      });
+    } finally {
+      setSubiendoPdf(false);
     }
   };
 
@@ -151,12 +200,74 @@ const NuevoCliente = () => {
               <Input variant="flushed" placeholder="https://goo.gl/maps/..." focusBorderColor="#004481" value={formData.googleMapsLink} onChange={handleChange} />
             </FormControl>
 
+            <FormControl id="dniPdf">
+              <FormLabel fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase">
+                Documento DNI (PDF)
+              </FormLabel>
+              
+              {!formData.dniPdf ? (
+                <Box 
+                  as="label" 
+                  display="flex" 
+                  flexDirection="column" 
+                  alignItems="center" 
+                  justifyContent="center"
+                  border="2px dashed" 
+                  borderColor={subiendoPdf ? "#004481" : "gray.200"}
+                  borderRadius="xl"
+                  p={6}
+                  cursor="pointer"
+                  transition="0.2s"
+                  _hover={{ borderColor: "#004481", bg: "blue.50" }}
+                >
+                  <Input 
+                    type="file" 
+                    accept="application/pdf" 
+                    hidden 
+                    onChange={handleFileChangeCloudinary}
+                    disabled={subiendoPdf}
+                  />
+                  {subiendoPdf ? (
+                    <Spinner color="#004481"  />
+                  ) : (
+                    <Icon as={FileArrowUp} size={32} color="gray.400" mb={2} />
+                  )}
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    {subiendoPdf ? "Subiendo a la nube..." : "Toca para subir el DNI en PDF"}
+                  </Text>
+                </Box>
+              ) : (
+                <HStack p={4} bg="blue.50" borderRadius="xl" border="1px solid" borderColor="blue.100" justify="space-between">
+                  <HStack>
+                    <Icon as={FilePdf} size={24} color="#004481" weight="fill" />
+                    <VStack align="start" spacing={0}>
+                      <Text fontSize="xs" fontWeight="bold" color="#004481" noOfLines={1}>
+                        {nombreArchivo || "DNI_Cliente.pdf"}
+                      </Text>
+                      <Text fontSize="10px" color="blue.600">Documento listo</Text>
+                    </VStack>
+                  </HStack>
+                  <IconButton
+                    size="sm"
+                    icon={<Trash weight="bold" />}
+                    variant="ghost"
+                    colorScheme="red"
+                    onClick={() => {
+                      setFormData({ ...formData, dniPdf: "" });
+                      setNombreArchivo("");
+                    }}
+                    aria-label="Eliminar PDF"
+                  />
+                </HStack>
+              )}
+            </FormControl>
+
             <Box w="full" pt={6}>
               <Button 
                 bg="#004481" color="white" w="full" size="lg" borderRadius="none"
                 _hover={{ bg: "#003366" }}
                 onClick={onOpen} // Abre el modal de confirmación
-                isDisabled={!formData.nombres || !formData.dni} // Validación básica
+                isDisabled={!formData.nombres || !formData.dni || subiendoPdf} // Validación básica
               >
                 Guardar Cliente
               </Button>

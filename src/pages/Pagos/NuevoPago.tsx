@@ -1,13 +1,18 @@
 import { 
     VStack, Box, Text, IconButton, Flex, Button, FormControl, 
-    FormLabel, Input, SimpleGrid, useToast, Center, Divider 
+    FormLabel, Input, SimpleGrid, useToast, Center, Divider, 
+    Image,
+    CloseButton,
+    Spinner,
+    Icon
   } from "@chakra-ui/react";
-  import { ArrowLeft, Check, CurrencyDollar } from "phosphor-react";
+  import { ArrowLeft, Camera, Check, CurrencyDollar } from "phosphor-react";
   import { useEffect, useState } from "react";
   import { useNavigate, useLocation, useParams } from "react-router-dom";
   import MainLayout from "../../layouts/MainLayout";
 import type { PagoDTO } from "../../types/Pago";
 import pagoService from "../../api/pagosService";
+import { uploadToCloudinary } from "../../api/cloudinary/cloudinaryService";
   
   const NuevoPago = () => {
     const navigate = useNavigate();
@@ -15,7 +20,9 @@ import pagoService from "../../api/pagosService";
     const params = useParams<{ cronogramaId: string }>();
     const { state } = useLocation(); 
     const toast = useToast();
-  
+    const [imagenUrl, setImagenUrl] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
+
     const [monto, setMonto] = useState(state?.montoSugerido?.toString() || "");
     const [metodo, setMetodo] = useState("YAPE");
     const [loading, setLoading] = useState(false);
@@ -46,7 +53,7 @@ import pagoService from "../../api/pagosService";
           cronogramaId: idNumerico, 
           monto: parseFloat(monto),
           metodo: metodo,
-          foto: ""
+          foto: imagenUrl
         };
   
   
@@ -80,6 +87,32 @@ import pagoService from "../../api/pagosService";
       } 
     };
 
+    const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+  
+      // Validación rápida de peso
+      if (file.size > 3 * 1024 * 1024) {
+        toast({ title: "La imagen es muy pesada", status: "warning" });
+        return;
+      }
+  
+      try {
+        setIsUploading(true);
+        const url = await uploadToCloudinary(file, 'pago'); 
+        setImagenUrl(url);
+        
+        toast({ title: "Captura cargada", status: "success", duration: 2000 });
+      } catch (error) {
+        toast({ 
+          title: "Error al subir", 
+          description: "No se pudo conectar con el servidor de imágenes", 
+          status: "error" 
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    };
 
     return (
       <MainLayout>
@@ -140,13 +173,43 @@ import pagoService from "../../api/pagosService";
                     ))}
                   </SimpleGrid>
                 </FormControl>
+
+                <FormControl>
+                  <FormLabel fontWeight="bold" color="gray.700">Comprobante (Opcional)</FormLabel>
+                  {imagenUrl ? (
+                    <Box position="relative" borderRadius="xl" overflow="hidden" border="1px solid" borderColor="gray.200">
+                      <Image src={imagenUrl} alt="Voucher" objectFit="cover" w="full" h="200px" />
+                      <CloseButton 
+                        position="absolute" top={2} right={2} bg="white" shadow="md" borderRadius="full"
+                        onClick={() => setImagenUrl("")} 
+                      />
+                    </Box>
+                  ) : (
+                    <Center 
+                      as="label" h="120px" w="full" borderRadius="xl" border="2px dashed" 
+                      borderColor="gray.300" cursor="pointer" _hover={{ bg: "gray.50" }}
+                      flexDirection="column" transition="all 0.2s"
+                    >
+                      <input type="file" accept="image/*" hidden onChange={handleUploadImage} disabled={isUploading} />
+                      {isUploading ? (
+                        <Spinner color="#004481" />
+                      ) : (
+                        <>
+                          <Icon as={Camera} size={32} color="gray.400" weight="duotone" />
+                          <Text fontSize="xs" color="gray.500" mt={2}>Subir captura o foto del voucher</Text>
+                        </>
+                      )}
+                    </Center>
+                  )}
+                </FormControl>
+            
   
                 <Button 
                   w="full" size="lg" h="75px" bg="#004481" color="white"
                   leftIcon={<Check size={28} weight="bold" />}
                   isLoading={loading}
-                  isDisabled={loading} 
-                  loadingText="Registrando..."
+                  isDisabled={loading || isUploading} 
+                  loadingText={isUploading ? "Subiendo imagen..." : "Registrando..."}
                   onClick={handlePago}
                   borderRadius="2xl" shadow="xl" mt={4}
                   _active={{ transform: "scale(0.95)" }}

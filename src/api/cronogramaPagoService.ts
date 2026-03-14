@@ -1,4 +1,4 @@
-import type { CronogramaDTO } from "../types/CronogramaPago";
+import type { CronogramaDetalladoDTO, CronogramaDTO } from "../types/CronogramaPago";
 import api from "./axios/axios"; // Importamos tu instancia configurada
 
 const cronogramaService = {
@@ -12,8 +12,8 @@ const cronogramaService = {
       return response.data;
     },
 
-    obtenerProximosCobros: async (): Promise<CronogramaDTO[]> => {
-        const response = await api.get<CronogramaDTO[]>(`/cronogramas/proximos-cobros`);
+    obtenerProximosCobros: async (): Promise<CronogramaDetalladoDTO[]> => {
+        const response = await api.get<CronogramaDetalladoDTO[]>(`/cronogramas/proximos-cobros`);
         return response.data;
     }
 };

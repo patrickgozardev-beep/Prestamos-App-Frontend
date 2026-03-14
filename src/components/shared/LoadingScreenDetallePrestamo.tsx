@@ -62,6 +62,7 @@ import MainLayout from "../../layouts/MainLayout";
     }
     if(type === 'dashboard'){
         return (
+          <MainLayout>
             <VStack spacing={6} align="stretch" w="full" pb={10} p={4}>
               
               {/* Superior: Saludo y Notificaciones */}
@@ -131,6 +132,8 @@ import MainLayout from "../../layouts/MainLayout";
                 </VStack>
               </Box>
             </VStack>
+          </MainLayout>
+
           );
     }
 

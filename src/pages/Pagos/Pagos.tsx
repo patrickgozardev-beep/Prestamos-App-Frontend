@@ -72,7 +72,7 @@ import {
                     shadow="sm"
                     border="1px solid"
                     borderColor="gray.50"
-                    onClick={() => navigate(`/pago/detalle/${pago.id}`)}
+                    onClick={() => navigate(`/pago/detalle/${pago.id}`, { replace: true })}
                     _active={{ bg: "gray.50" }}
                     cursor="pointer"
                   >

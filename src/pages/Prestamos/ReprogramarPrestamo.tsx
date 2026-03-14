@@ -34,7 +34,7 @@ import CustomSelect from "../../components/CustomSelect";
         });
         
         // Volvemos al detalle usando replace para que no pueda volver atrás a la pantalla de reprogramación
-        navigate(`/prestamos/detalle/${id}`, { replace: true });
+        navigate(`/prestamos/${id}`, { replace: true });
       } catch (error) {
         toast({
           title: "Error",

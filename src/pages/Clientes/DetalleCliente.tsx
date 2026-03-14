@@ -4,7 +4,7 @@ import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
   useDisclosure, Icon
 } from "@chakra-ui/react";
-import { CaretLeft, Trash, PencilLine, MapPin, Warning, UserPlus, House } from "phosphor-react";
+import { CaretLeft, Trash, PencilLine, MapPin, Warning, House, FilePdf, Eye } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -15,8 +15,8 @@ const DetalleCliente = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
-  
-  // Disclosure para el modal de eliminación
+
+  // Solo mantenemos el disclosure para la eliminación
   const { isOpen, onOpen, onClose } = useDisclosure();
   
   const [cliente, setCliente] = useState<ClienteDTO | null>(null);
@@ -36,7 +36,6 @@ const DetalleCliente = () => {
           description: "No se pudo obtener la información del cliente",
           status: "error",
           duration: 3000,
-          isClosable: true,
         });
         navigate("/clientes");
       } finally {
@@ -46,24 +45,15 @@ const DetalleCliente = () => {
     cargarDatos();
   }, [id, navigate, toast]);
 
-  // Función para eliminar al cliente
   const handleEliminar = async () => {
     if (!id) return;
     try {
       setIsDeleting(true);
       await clienteService.eliminar(Number(id));
-      toast({
-        title: "Cliente eliminado",
-        status: "success",
-        duration: 3000,
-      });
+      toast({ title: "Cliente eliminado", status: "success" });
       navigate("/clientes");
     } catch (error) {
-      toast({
-        title: "Error al eliminar",
-        description: "No se pudo eliminar el cliente, intente más tarde.",
-        status: "error",
-      });
+      toast({ title: "Error al eliminar", status: "error" });
     } finally {
       setIsDeleting(false);
       onClose();
@@ -73,9 +63,7 @@ const DetalleCliente = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Center h="80vh">
-          <Spinner speed="0.65s" color="#004481" size="xl" />
-        </Center>
+        <Center h="80vh"><Spinner color="#004481" size="xl" /></Center>
       </MainLayout>
     );
   }
@@ -83,6 +71,7 @@ const DetalleCliente = () => {
   return (
     <MainLayout>
       <VStack spacing={0} align="stretch" w="full" bg="white" minH="100vh">
+        {/* Header */}
         <Flex align="center" py={4} px={2} borderBottom="1px solid" borderColor="gray.100">
           <IconButton 
             icon={<CaretLeft size={24} weight="bold" />} 
@@ -98,7 +87,7 @@ const DetalleCliente = () => {
                 colorScheme="blue"
                 variant="ghost"
                 onClick={() => navigate("/dashboard")}
-                aria-label="Agregar Cliente"
+                aria-label="Inicio"
               />
           </Flex>
         </Flex>
@@ -123,6 +112,37 @@ const DetalleCliente = () => {
 
             <Divider />
 
+            {/* --- SECCIÓN DE DOCUMENTACIÓN (AHORA ABRE URL) --- */}
+            <Box w="full">
+              <Text fontSize="xs" color="gray.500" fontWeight="900" letterSpacing="widest" mb={3}>DOCUMENTACIÓN</Text>
+              {cliente?.dniPdf ? (
+                <HStack 
+                  p={4} 
+                  bg="blue.50" 
+                  borderRadius="lg" 
+                  border="1px solid" 
+                  borderColor="blue.100"
+                  justify="space-between"
+                  cursor="pointer"
+                  // Aquí se abre la URL directamente
+                  onClick={() => window.open(cliente.dniPdf, "_blank", "noopener,noreferrer")}
+                  _hover={{ bg: "blue.100" }}
+                  transition="all 0.2s"
+                >
+                  <HStack>
+                    <Icon as={FilePdf} size={28} color="#004481" weight="fill" />
+                    <VStack align="start" spacing={0}>
+                      <Text fontSize="sm" fontWeight="bold" color="#004481">DNI Digitalizado</Text>
+                      <Text fontSize="xs" color="blue.600">Click para ver documento</Text>
+                    </VStack>
+                  </HStack>
+                  <Icon as={Eye} size={20} color="#004481" />
+                </HStack>
+              ) : (
+                <Text fontSize="sm" color="gray.400">No se adjuntó documento DNI</Text>
+              )}
+            </Box>
+
             {cliente?.googleMapsLink && (
               <Button 
                 leftIcon={<MapPin weight="fill" />} 
@@ -142,7 +162,6 @@ const DetalleCliente = () => {
                 colorScheme="blue" 
                 variant="outline" 
                 borderRadius="md"
-                // Aquí navegamos a la pantalla de edición
                 onClick={() => navigate(`/clientes/editar/${id}`)}
               >
                 Editar
@@ -192,6 +211,7 @@ const DetalleCliente = () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
+
       </VStack>
     </MainLayout>
   );

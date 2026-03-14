@@ -3,9 +3,10 @@ import {
     FormLabel, Input, Button, InputGroup, InputLeftAddon, 
     Icon, Center, useDisclosure, Modal, ModalOverlay, 
     ModalContent, ModalHeader, ModalBody, ModalFooter, useToast, Spinner,
-    FormErrorMessage
+    FormErrorMessage,
+    HStack
   } from "@chakra-ui/react";
-  import { CaretLeft, CloudArrowUp, FloppyDiskBack, Warning } from "phosphor-react";
+  import { CaretLeft, CloudArrowUp, FilePdf, FloppyDiskBack, Warning } from "phosphor-react";
   import MainLayout from "../../layouts/MainLayout";
   import { useNavigate, useParams } from "react-router-dom";
   import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ import {
     const navigate = useNavigate();
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    
+    const [isUploading, setIsUploading] = useState(false);
     const [loading, setLoading] = useState(true); // Carga inicial de datos
     const [isUpdating, setIsUpdating] = useState(false); // Estado del botón guardar
   
@@ -29,31 +30,79 @@ import {
       dniPdf: ""
     });
   
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+    
+      // Validación de peso máximo antes de subir (ej. 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Archivo muy pesado",
+          description: "El DNI no debe superar los 2MB.",
+          status: "error",
+        });
+        return;
+      }
+    
+      const formDataCloudinary = new FormData();
+      formDataCloudinary.append("file", file);
+      formDataCloudinary.append("upload_preset", "preset_dni");
+      
+
+      try {
+        setIsUploading(true);
+        const response = await fetch(
+          "https://api.cloudinary.com/v1_1/dmt9yobr2/image/upload",
+          { method: "POST", body: formDataCloudinary }
+        );
+        const data = await response.json();
+    
+        if (data.secure_url) {
+          setFormData({ ...formData, dniPdf: data.secure_url });
+          toast({
+            title: "Documento cargado",
+            description: "El nuevo DNI se ha subido correctamente.",
+            status: "success",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error de subida",
+          description: "No se pudo subir el archivo a Cloudinary.",
+          status: "error",
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    };
+
+    const cargarCliente = async () => {
+      if (!id) return;
+      try {
+        setLoading(true);
+        const data = await clienteService.obtenerPorId(Number(id));
+        setFormData({
+          nombres: data.nombres,
+          dni: data.dni,
+          telefono: data.telefono || "",
+          googleMapsLink: data.googleMapsLink || "",
+          dniPdf: data.dniPdf || ""
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "No se pudo cargar la información del cliente.",
+          status: "error",
+        });
+        navigate("/clientes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     // 1. Cargar datos del cliente al iniciar
     useEffect(() => {
-      const cargarCliente = async () => {
-        if (!id) return;
-        try {
-          setLoading(true);
-          const data = await clienteService.obtenerPorId(Number(id));
-          setFormData({
-            nombres: data.nombres,
-            dni: data.dni,
-            telefono: data.telefono || "",
-            googleMapsLink: data.googleMapsLink || "",
-            dniPdf: data.dniPdf || ""
-          });
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: "No se pudo cargar la información del cliente.",
-            status: "error",
-          });
-          navigate("/clientes");
-        } finally {
-          setLoading(false);
-        }
-      };
+      
       cargarCliente();
     }, [id, navigate, toast]);
   
@@ -183,6 +232,53 @@ import {
                 <Input variant="flushed" focusBorderColor="#004481" value={formData.googleMapsLink} onChange={handleChange} />
               </FormControl>
   
+              <FormControl id="dniPdf">
+                <FormLabel fontSize="xs" fontWeight="900" color="gray.500">DOCUMENTO DNI (PDF)</FormLabel>
+                <VStack align="start" spacing={3} w="full">
+                  {formData.dniPdf ? (
+                    <HStack 
+                      p={3} 
+                      bg="green.50" 
+                      borderRadius="md" 
+                      w="full" 
+                      border="1px dashed" 
+                      borderColor="green.200"
+                      justify="space-between"
+                    >
+                      <HStack>
+                        <Icon as={FilePdf} color="green.600" size={20} weight="fill" />
+                        <Text fontSize="xs" fontWeight="bold" color="green.700">DNI cargado actualmente</Text>
+                      </HStack>
+                      <Button size="xs" colorScheme="green" variant="ghost" onClick={() => window.open(formData.dniPdf, "_blank")}>
+                        Ver actual
+                      </Button>
+                    </HStack>
+                  ) : (
+                    <Text fontSize="xs" color="gray.400">No hay un documento registrado</Text>
+                  )}
+
+                  {/* Input de archivo oculto */}
+                  <input
+                    type="file"
+                    id="fileInput"
+                    accept=".pdf"
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  
+                  <Button
+                    leftIcon={isUploading ? <Spinner size="xs" /> : <CloudArrowUp weight="bold" />}
+                    variant="outline"
+                    colorScheme="blue"
+                    size="sm"
+                    w="full"
+                    isDisabled={isUploading}
+                    onClick={() => document.getElementById("fileInput")?.click()}
+                  >
+                    {isUploading ? "Subiendo..." : "Reemplazar / Subir DNI"}
+                  </Button>
+                </VStack>
+              </FormControl>
               <Box w="full" pt={6}>
                 <Button 
                   bg="#004481" color="white" w="full" size="lg" borderRadius="none"

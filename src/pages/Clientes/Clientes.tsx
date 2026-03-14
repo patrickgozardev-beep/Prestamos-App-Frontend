@@ -14,18 +14,18 @@ import {
   import MainLayout from "../../layouts/MainLayout";
   import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import type { Cliente } from "../../types/Cliente";
 import clienteService from "../../api/clienteService";
+import type { ClienteDTO } from "../../types/Cliente";
   
   const Clientes = () => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
   
     // 1. Estados para los datos y la carga
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [clientes, setClientes] = useState<ClienteDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+    const [selectedCliente, setSelectedCliente] = useState<ClienteDTO | null>(null);
 
     const fetchClientes = async () => {
       try {
@@ -41,7 +41,6 @@ import clienteService from "../../api/clienteService";
   
     // 3. Efecto de carga inicial
     useEffect(() => {
-      // Si el buscador está vacío, cargamos todos
       if (searchTerm.trim() === "") {
         fetchClientes();
         return;

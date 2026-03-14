@@ -3,8 +3,20 @@ export interface CronogramaDTO {
     numeroCuota: number;
     monto: number;
     montoPagado: number;
-    montoPendiente: number; // Nuevo: viene del cálculo en Java
-    fechaVencimiento: string; // Cambiado de fechaPago para coincidir con el Back
+    montoPendiente: number; 
+    fechaVencimiento: string; 
     estado: 'PENDIENTE' | 'PAGADO' | 'ATRASADO' | 'PARCIAL' | 'INACTIVO';
-    fechaPagado?: string; // Opcional, solo si ya se pagó
+    fechaPagado?: string;
+}
+export interface CronogramaDetalladoDTO {
+    id: number;
+    prestamoId:number;
+    nombreCliente:string;
+    numeroCuota: number;
+    monto: number;
+    montoPagado: number;
+    montoPendiente: number;
+    fechaVencimiento: string; 
+    estado: 'PENDIENTE' | 'PAGADO' | 'ATRASADO' | 'PARCIAL' | 'INACTIVO';
+    fechaPagado?: string; 
 }

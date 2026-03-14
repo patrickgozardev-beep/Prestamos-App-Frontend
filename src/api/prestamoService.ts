@@ -48,6 +48,14 @@ const prestamoService = {
     getMetricasDashboard : async () => {
       const response = await api.get(`/prestamos/dashboard/resumen`);
       return response.data;
+    },
+    eliminar : async (id: number): Promise<void> => {
+      try {
+        await api.delete(`/prestamos/${id}`); // Asegúrate que el path coincida con tu Controller
+      } catch (error) {
+        console.error("Error en prestamoService.eliminar:", error);
+        throw error;
+      }
     }
 
   };

@@ -15,12 +15,13 @@ import {
   import React, { useEffect, useState, useRef } from "react";
   import MainLayout from "../../layouts/MainLayout";
   import pagoService from "../../api/pagosService";
+import type { PagoDTO } from "../../types/Pago";
 
   const DetallePago = () => {
     const { pagoId } = useParams();
     const navigate = useNavigate();
     const toast = useToast();
-    const [pago, setPago] = useState<any>(null);
+    const [pago, setPago] = useState<any>();
     const [loading, setLoading] = useState(true);
   
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -128,19 +129,6 @@ import {
             </Box>
   
             {/* Visualización de la Captura (foto_pago) */}
-            <VStack align="stretch" w="full" spacing={3}>
-            <Text fontSize="sm" fontWeight="bold" color="gray.600" ml={1}>Comprobante adjunto</Text>
-            <Box borderRadius="2xl" overflow="hidden" border="2px solid" borderColor="gray.100" shadow="md">
-                <Image 
-                src='https://i.pinimg.com/236x/71/71/b9/7171b923637a47425975a3b42392bd17.jpg' 
-                alt="Captura de pago" 
-                w="full"
-                maxH="450px"
-                objectFit="contain"
-                bg="gray.200"
-                />
-            </Box>
-            </VStack>
             {pago.fotoPago && (
               <VStack align="stretch" w="full" spacing={3}>
                 <Text fontSize="sm" fontWeight="bold" color="gray.600" ml={1}>Comprobante adjunto</Text>

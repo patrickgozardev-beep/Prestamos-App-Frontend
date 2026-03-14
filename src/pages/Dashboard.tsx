@@ -10,15 +10,16 @@ import { useEffect, useState } from "react";
 import prestamoService from "../api/prestamoService";
 import LoadingScreen from "../components/shared/LoadingScreenDetallePrestamo";
 import type { MetricasDashboardDTO } from "../types/MetricasDashboard";
-import type { CronogramaDTO } from "../types/CronogramaPago";
+import type { CronogramaDetalladoDTO } from "../types/CronogramaPago";
 import cronogramaService from "../api/cronogramaPagoService";
+import { formatearFecha } from "../utils/funciones";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [metricas, setMetricas] = useState<MetricasDashboardDTO | null>(null);
-  const [proximos, setProximos] = useState<CronogramaDTO[]>([]);
+  const [proximos, setProximos] = useState<CronogramaDetalladoDTO[]>([]);
 
   const loadDashboardData = async () => {
     try {
@@ -162,29 +163,65 @@ const Dashboard = () => {
             <VStack spacing={3}>
               {proximos.slice(0, 4).map((cobro) => (
                 <HStack 
-                  key={cobro.id} w="full" p={4} bg="white" borderRadius="xl" shadow="sm" 
-                  justifyContent="space-between" cursor="pointer"
-                  onClick={() => navigate(`/prestamos/detalle/${cobro.id}`)}
-                  _active={{ transform: "scale(0.98)", bg: "gray.50" }}
-                  transition="all 0.2s"
-                >
-                  <HStack spacing={3}>
-                    <Circle size="10px" bg={cobro.estado === 'PARCIAL' ? "orange.400" : "teal.400"} />
-                    <VStack align="start" spacing={0}>
-                      <Text fontSize="sm" fontWeight="bold" color="gray.700">
-                        {/* Asegúrate de que el DTO incluya el nombre o ID del préstamo */}
-                        Cuota #{cobro.numeroCuota}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        Vence el {new Date(cobro.fechaVencimiento).toLocaleDateString('es-PE')}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                  <HStack>
-                      <Text fontWeight="900" color="#004481">S/ {cobro.monto.toFixed(2)}</Text>
-                      <CaretRight size={16} weight="bold" color="gray.400" />
-                  </HStack>
+                key={cobro.id} 
+                w="full" 
+                p={4} 
+                bg="white" 
+                borderRadius="xl" 
+                shadow="sm" 
+                border="1px solid"
+                borderColor="gray.100"
+                justifyContent="space-between" 
+                cursor="pointer"
+                onClick={() => navigate(`/prestamos/${cobro.prestamoId}`)}
+                _hover={{ shadow: "md", borderColor: "blue.100" }}
+                _active={{ transform: "scale(0.98)", bg: "gray.50" }}
+                transition="all 0.2s"
+              >
+                <HStack spacing={4} flex={1}>
+                  {/* Indicador de estado más visual */}
+                  <Circle 
+                    size="12px" 
+                    bg={cobro.estado === 'PARCIAL' ? "orange.400" : "teal.400"} 
+                    boxShadow="0 0 8px rgba(0,0,0,0.1)"
+                  />
+                  
+                  <VStack align="start" spacing={0} flex={1}>
+                    {/* NOMBRE DEL CLIENTE: Ahora es lo primero que se lee */}
+                    <Text 
+                      fontSize="sm" 
+                      fontWeight="extrabold" 
+                      color="gray.800" 
+                      noOfLines={1}
+                      textTransform="uppercase"
+                      letterSpacing="tight"
+                    >
+                      {cobro.nombreCliente}
+                    </Text>
+                    
+                    {/* Detalles secundarios en una sola línea */}
+                    <HStack spacing={2} color="gray.500" fontSize="xs">
+                      <Text fontWeight="medium">Cuota #{cobro.numeroCuota}</Text>
+                      <Text>•</Text>
+                      <Text>Vence {formatearFecha(cobro.fechaVencimiento)}</Text>
+                    </HStack>
+                  </VStack>
                 </HStack>
+        
+                <HStack spacing={3}>
+                  <VStack align="end" spacing={0}>
+                    <Text fontWeight="800" color="#004481" fontSize="md">
+                      S/ {cobro.monto.toFixed(2)}
+                    </Text>
+                    {cobro.montoPagado > 0 && (
+                      <Text fontSize="10px" color="orange.500" fontWeight="bold">
+                        Faltan: S/ {cobro.montoPendiente.toFixed(2)}
+                      </Text>
+                    )}
+                  </VStack>
+                  <CaretRight size={18} weight="bold" color="gray.300" />
+                </HStack>
+              </HStack>
               ))}
             </VStack>
           ) : (
