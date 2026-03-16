@@ -1,36 +1,34 @@
 import { 
-    VStack, Text, Box, HStack, Icon, Input, InputGroup, InputLeftElement, 
+    VStack, Text, Box, HStack, Input, InputGroup, InputLeftElement, 
     IconButton, Flex, Badge, Divider, Button, 
     useDisclosure,
     Modal,
     ModalOverlay,
     ModalContent,
     ModalBody,
-    List,
-    ListItem,
-    ListIcon,
+
   } from "@chakra-ui/react";
-  import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, UserPlus, CaretRight, User } from "phosphor-react";
+  import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, CaretRight, User } from "phosphor-react";
   import MainLayout from "../../layouts/MainLayout";
   import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import type { Cliente } from "../../types/Cliente";
 import clienteService from "../../api/clienteService";
+import type { ClienteDTO } from "../../types/Cliente";
   
   const Clientes = () => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
   
     // 1. Estados para los datos y la carga
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [clientes, setClientes] = useState<ClienteDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+    const [selectedCliente, setSelectedCliente] = useState<ClienteDTO | null>(null);
 
     const fetchClientes = async () => {
       try {
         setLoading(true);
-        const data = await clienteService.listarPorUsuario(1);
+        const data = await clienteService.listarPorUsuario();
         setClientes(data);
       } catch (error) {
         console.error("Error al obtener mis clientes:", error);
@@ -41,7 +39,6 @@ import clienteService from "../../api/clienteService";
   
     // 3. Efecto de carga inicial
     useEffect(() => {
-      // Si el buscador está vacío, cargamos todos
       if (searchTerm.trim() === "") {
         fetchClientes();
         return;
@@ -116,15 +113,7 @@ import clienteService from "../../api/clienteService";
             <Text fontSize="lg" fontWeight="bold" color="#004481" ml={2}>
               Mis Clientes
             </Text>
-            <Flex flex={1} justify="flex-end">
-              <IconButton
-                icon={<UserPlus size={24} weight="duotone" />}
-                colorScheme="blue"
-                variant="ghost"
-                onClick={() => navigate("/clientes/nuevo")}
-                aria-label="Agregar Cliente"
-              />
-            </Flex>
+
           </Flex>
   
           {/* Buscador */}
