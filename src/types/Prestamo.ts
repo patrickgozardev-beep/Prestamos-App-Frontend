@@ -7,7 +7,6 @@ export interface PrestamoDTO {
     interesPorcentaje: number;
     fechaInicio: string; 
     cantidadCuotas: number;
-    usuarioId: number;
   }
 
 export interface PrestamoDetalleDTO {
@@ -31,5 +30,4 @@ export interface PrestamoCreateDTO {
     interesPorcentaje: number;
     fechaInicio: string; 
     cantidadCuotas: number;
-    usuarioId: number;
 }

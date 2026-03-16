@@ -6,7 +6,7 @@ import {
     Spinner,
     Icon
   } from "@chakra-ui/react";
-  import { ArrowLeft, Camera, Check, CurrencyDollar } from "phosphor-react";
+  import { ArrowLeft, Camera, Check } from "phosphor-react";
   import { useEffect, useState } from "react";
   import { useNavigate, useLocation, useParams } from "react-router-dom";
   import MainLayout from "../../layouts/MainLayout";

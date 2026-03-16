@@ -10,7 +10,6 @@ const Prestamos = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clienteId = searchParams.get("clienteId");
-  const USUARIO_ID = 1; // ID del cobrador en sesión
 
   const [prestamos, setPrestamos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +20,7 @@ const Prestamos = () => {
         setLoading(true);
         const data = clienteId 
           ? await prestamoService.listarPorCliente(Number(clienteId))
-          : await prestamoService.listarPorUsuario(USUARIO_ID);
+          : await prestamoService.listarPorUsuario();
         setPrestamos(data);
       } catch (error) {
         console.error("Error al cargar préstamos", error);

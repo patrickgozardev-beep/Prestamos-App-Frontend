@@ -14,6 +14,7 @@ import Pagos from "../pages/Pagos/Pagos";
 import DetallePago from "../pages/Pagos/DetallePago";
 import ReprogramarPrestamo from "../pages/Prestamos/ReprogramarPrestamo";
 import EliminarPrestamo from "../pages/Prestamos/EliminarPrestamo";
+import NotificarPrestamo from "../pages/Prestamos/NotificarPrestamo";
 
 interface AppRoute {
   path: string;
@@ -70,6 +71,11 @@ export const privateRoutes: AppRoute[] = [
 
     path: "/prestamos/eliminar/:id",
     element: <ProtectedRoute><EliminarPrestamo /></ProtectedRoute>,
+  },
+  {
+
+    path: "/prestamos/notificar/:id",
+    element: <ProtectedRoute><NotificarPrestamo /></ProtectedRoute>,
   },
   {
 

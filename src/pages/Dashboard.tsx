@@ -13,6 +13,8 @@ import type { MetricasDashboardDTO } from "../types/MetricasDashboard";
 import type { CronogramaDetalladoDTO } from "../types/CronogramaPago";
 import cronogramaService from "../api/cronogramaPagoService";
 import { formatearFecha } from "../utils/funciones";
+import { jwtDecode } from "jwt-decode";
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,8 +22,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [metricas, setMetricas] = useState<MetricasDashboardDTO | null>(null);
   const [proximos, setProximos] = useState<CronogramaDetalladoDTO[]>([]);
+  const [userName, setUserName] = useState("Usuario");
 
-  const loadDashboardData = async () => {
+const loadDashboardData = async () => {
     try {
       setLoading(true);
       const [dataMetricas, dataProximos] = await Promise.all([
@@ -44,6 +47,25 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        
+        // 1. PRIORIDAD: Primero busca 'nombre'. 
+        // Si no lo encuentra, recién busca 'sub'.
+        const nombreDelToken = decoded.nombre; 
+
+        // 2. Limpieza para el estilo "BBVA": Solo primer nombre y bien escrito
+        const primerNombre = nombreDelToken.split(' ')[0];
+        const formateado = primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase();
+        
+        setUserName(formateado);
+      } catch (error) {
+        console.error("Error al decodificar", error);
+        setUserName("Usuario");
+      }
+    }
     loadDashboardData();
   }, []);
 
@@ -57,7 +79,7 @@ const Dashboard = () => {
         <Flex align="center" px={2}>
           <Box>
             <Text fontSize="sm" color="gray.500">Hola, Steve</Text>
-            <Text fontSize="xl" fontWeight="900" color="#004481">GOZAR CAPITAL</Text>
+            <Text fontSize="xl" fontWeight="900" color="#004481">{userName}</Text>
           </Box>
           <Spacer />
           <HStack spacing={4}>
@@ -120,7 +142,7 @@ const Dashboard = () => {
         </Box>
 
         {/* Sección de Accesos Directos */}
-        <Text fontSize="sm" fontWeight="bold" color="gray.600" px={2}>OPERACIONES FRECUENTES</Text>
+        <Text fontSize="sm" fontWeight="bold" color="gray.600" px={2}>OPERACIONES</Text>
         <SimpleGrid columns={3} spacing={4} px={2}>
           <VStack onClick={() => navigate("/clientes")} cursor="pointer">
             <Circle size="60px" bg="white" shadow="sm" border="1px solid" borderColor="gray.100">
@@ -136,12 +158,12 @@ const Dashboard = () => {
             <Text fontSize="xs" fontWeight="bold" color="#004481">Préstamos</Text>
           </VStack>
 
-          <VStack onClick={() => navigate("/metricas")} cursor="pointer">
+          {/* <VStack onClick={() => navigate("/metricas")} cursor="pointer">
             <Circle size="60px" bg="white" shadow="sm" border="1px solid" borderColor="gray.100">
               <ChartPieSlice size={28} color="#004481" weight="duotone" />
             </Circle>
             <Text fontSize="xs" fontWeight="bold" color="#004481">Métricas</Text>
-          </VStack>
+          </VStack> */}
         </SimpleGrid>
 
         {/* Lista de Próximos Cobros (Hardcoded por ahora) */}

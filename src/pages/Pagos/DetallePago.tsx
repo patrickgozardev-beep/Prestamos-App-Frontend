@@ -1,6 +1,6 @@
 import { 
     VStack, Box, Text, IconButton, Flex, Image, 
-    Stat, StatLabel, StatNumber, Badge, Divider, Center, Spinner,
+    Badge,  Center, Spinner,
     HStack, Icon, Button, useToast,
     AlertDialog,
     AlertDialogOverlay,
@@ -10,12 +10,11 @@ import {
     AlertDialogFooter,
     useDisclosure
   } from "@chakra-ui/react";
-  import { CaretLeft, CalendarBlank, CreditCard, Hash, Receipt, ShareNetwork, Trash, CheckCircle } from "phosphor-react";
+  import { CaretLeft, ShareNetwork, Trash, CheckCircle } from "phosphor-react";
   import { useNavigate, useParams } from "react-router-dom";
-  import React, { useEffect, useState, useRef } from "react";
+  import  { useEffect, useState, useRef } from "react";
   import MainLayout from "../../layouts/MainLayout";
   import pagoService from "../../api/pagosService";
-import type { PagoDTO } from "../../types/Pago";
 
   const DetallePago = () => {
     const { pagoId } = useParams();

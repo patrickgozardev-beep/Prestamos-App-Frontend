@@ -1,24 +1,13 @@
 import {
     VStack, Box, Text, HStack, IconButton, Flex, Badge, 
-    Progress, Divider, Button, Center, Spinner, Stack, Icon,
-    useToast,
-    Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogContent,
-    AlertDialogOverlay,
+    Progress, Divider, Button, Center, Icon,
     useDisclosure,
     Modal,
     ModalOverlay,
     ModalContent,
     ModalBody
   } from "@chakra-ui/react";
-  import { CaretLeft, CheckCircle, Clock, CurrencyDollar, CalendarBlank, MapPin, House, Gear, ArrowsClockwise, Trash } from "phosphor-react";
+  import { CaretLeft, CheckCircle, Clock, CurrencyDollar, CalendarBlank, MapPin, House, Gear, ArrowsClockwise, Trash, WhatsappLogo } from "phosphor-react";
   import { replace, useNavigate, useParams } from "react-router-dom";
   import { useEffect, useState } from "react";
   import MainLayout from "../../layouts/MainLayout";
@@ -161,14 +150,25 @@ import { formatearFecha } from "../../utils/funciones";
                     <Text fontWeight="900" color="#004481">Ajustes del Préstamo</Text>
                     <Text fontSize="xs" color="gray.500">¿Qué deseas realizar con este crédito?</Text>
                   </Box>
-                  
+                  {/* Opción 1: Enviar mensaje */}
+                  <Button 
+                    variant="ghost" justifyContent="start" h="65px" borderRadius="0"
+                    borderBottomRadius="2xl"
+                    color="#004481"
+                    leftIcon={<Icon as={WhatsappLogo} size={24} weight="duotone" color="#004481" />}
+                    onClick={() => {
+                      onClose();
+                      navigate(`/prestamos/notificar/${prestamo.id}`);                    }}
+                  >
+                    Enviar mensaje detallado
+                  </Button>
                   {/* Opción 1: Reprogramar */}
                   <Button 
                     variant="ghost" 
                     justifyContent="start" 
                     h="65px" 
                     borderRadius="0"
-                    leftIcon={<Icon as={ArrowsClockwise} size={24} weight="duotone" color="#004481" />}
+                    leftIcon={<Icon as={ArrowsClockwise} size={24} weight="duotone"  />}
                     onClick={() => {
                       onClose();
                       navigate(`/prestamos/reprogramar/${prestamo.id}`, { 

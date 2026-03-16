@@ -1,6 +1,6 @@
 import { 
-    VStack, Box, Text, HStack, IconButton, Flex, Divider, 
-    Center, Spinner, Badge, Icon 
+    VStack, Box, Text, HStack, IconButton, Flex, 
+    Center, Spinner, Badge
   } from "@chakra-ui/react";
   import { CaretLeft, Receipt } from "phosphor-react";
   import { useNavigate, useParams } from "react-router-dom";
@@ -72,7 +72,7 @@ import {
                     shadow="sm"
                     border="1px solid"
                     borderColor="gray.50"
-                    onClick={() => navigate(`/pago/detalle/${pago.id}`, { replace: true })}
+                    onClick={() => navigate(`/pago/detalle/${pago.id}`)}
                     _active={{ bg: "gray.50" }}
                     cursor="pointer"
                   >

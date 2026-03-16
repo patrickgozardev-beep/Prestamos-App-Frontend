@@ -30,7 +30,7 @@ import type { ClienteDTO } from "../../types/Cliente";
     const fetchClientes = async () => {
       try {
         setLoading(true);
-        const data = await clienteService.listarPorUsuario(1);
+        const data = await clienteService.listarPorUsuario();
         setClientes(data);
       } catch (error) {
         console.error("Error al obtener mis clientes:", error);

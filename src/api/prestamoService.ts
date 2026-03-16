@@ -36,8 +36,8 @@ const prestamoService = {
     },
   
     // GET: Ver préstamos por usuario (General)
-    listarPorUsuario: async (usuarioId: number): Promise<PrestamoDTO[]> => {
-      const response = await api.get<PrestamoDTO[]>(`/prestamos/usuario/${usuarioId}`);
+    listarPorUsuario: async (): Promise<PrestamoDTO[]> => {
+      const response = await api.get<PrestamoDTO[]>(`/prestamos/usuario`);
       return response.data;
     },
     
@@ -56,6 +56,10 @@ const prestamoService = {
         console.error("Error en prestamoService.eliminar:", error);
         throw error;
       }
+    },
+    obtenerLinkWhatsApp: async (id: number): Promise<{ link: string }> => {
+      const response = await api.get<{ link: string }>(`/prestamos/${id}/whatsapp-link`);
+      return response.data;
     }
 
   };

@@ -1,4 +1,4 @@
-import { VStack, Text, Box, Flex, Input, Button, InputGroup, InputLeftAddon, useToast, Spacer, Spinner } from "@chakra-ui/react";
+import { VStack, Text, Box, Flex, Input, Button, InputGroup, InputLeftAddon, useToast } from "@chakra-ui/react";
 import { CaretLeft } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import CustomSelect from "../../components/CustomSelect";
@@ -23,7 +23,6 @@ const NuevoPrestamo = () => {
     interesPorcentaje: "20",
     fechaInicio: new Date().toISOString().split('T')[0],
     cantidadCuotas: "",
-    usuarioId: 1 // ID del cobrador (ajustar según tu Auth)
   });
 
   // Cargar clientes desde el backend si no viene filtrado

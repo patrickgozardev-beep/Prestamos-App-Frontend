@@ -10,8 +10,8 @@ const clienteService = {
   },
 
   // GET: Listar clientes por usuario
-  listarPorUsuario: async (usuarioId: number): Promise<ClienteDTO[]> => {
-      const response = await api.get<ClienteDTO[]>(`/clientes/usuario/${usuarioId}`);
+  listarPorUsuario: async (): Promise<ClienteDTO[]> => {
+      const response = await api.get<ClienteDTO[]>(`/clientes/usuario`);
       return response.data;
   },    
 
