@@ -1,16 +1,14 @@
 import { 
-    VStack, Text, Box, HStack, Icon, Input, InputGroup, InputLeftElement, 
+    VStack, Text, Box, HStack, Input, InputGroup, InputLeftElement, 
     IconButton, Flex, Badge, Divider, Button, 
     useDisclosure,
     Modal,
     ModalOverlay,
     ModalContent,
     ModalBody,
-    List,
-    ListItem,
-    ListIcon,
+
   } from "@chakra-ui/react";
-  import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, UserPlus, CaretRight, User } from "phosphor-react";
+  import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, CaretRight, User } from "phosphor-react";
   import MainLayout from "../../layouts/MainLayout";
   import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";

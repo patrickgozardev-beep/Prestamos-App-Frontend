@@ -1,7 +1,6 @@
 import {
     Box,
     Text,
-    VStack,
     Menu,
     MenuButton,
     MenuList,

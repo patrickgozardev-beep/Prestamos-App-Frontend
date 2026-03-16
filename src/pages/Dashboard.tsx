@@ -3,7 +3,7 @@ import {
   Button, SimpleGrid, useToast,
   Center
 } from "@chakra-ui/react";
-import { Users, Coins, ChartPieSlice, SignOut, CaretRight, Bell, CalendarBlank } from "phosphor-react";
+import { Users, Coins, SignOut, CaretRight, Bell, CalendarBlank } from "phosphor-react";
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";

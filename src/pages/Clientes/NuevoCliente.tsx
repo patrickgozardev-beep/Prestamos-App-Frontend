@@ -6,7 +6,7 @@ import {
   FormErrorMessage,
   HStack
 } from "@chakra-ui/react";
-import { CaretLeft, CloudArrowUp, MapPin, CheckCircle, Spinner } from "phosphor-react";
+import { CaretLeft, CheckCircle, Spinner } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
