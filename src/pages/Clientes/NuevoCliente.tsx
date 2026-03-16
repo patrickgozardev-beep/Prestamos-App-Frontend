@@ -103,7 +103,6 @@ const NuevoCliente = () => {
       // Objeto cliente alineado a tu backend
       const nuevoCliente: any = {
         ...formData,
-        usuario: { id: 1 } // ID del usuario en sesión (Hardcoded por ahora)
       };
 
       await clienteService.crear(nuevoCliente);

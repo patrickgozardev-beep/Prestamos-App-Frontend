@@ -55,12 +55,7 @@ const loadDashboardData = async () => {
         // 1. PRIORIDAD: Primero busca 'nombre'. 
         // Si no lo encuentra, recién busca 'sub'.
         const nombreDelToken = decoded.nombre; 
-
-        // 2. Limpieza para el estilo "BBVA": Solo primer nombre y bien escrito
-        const primerNombre = nombreDelToken.split(' ')[0];
-        const formateado = primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase();
-        
-        setUserName(formateado);
+        setUserName(nombreDelToken);
       } catch (error) {
         console.error("Error al decodificar", error);
         setUserName("Usuario");
@@ -78,7 +73,7 @@ const loadDashboardData = async () => {
         {/* Superior: Saludo y Notificaciones */}
         <Flex align="center" px={2}>
           <Box>
-            <Text fontSize="sm" color="gray.500">Hola, Steve</Text>
+            <Text fontSize="sm" color="gray.500">Hola, </Text>
             <Text fontSize="xl" fontWeight="900" color="#004481">{userName}</Text>
           </Box>
           <Spacer />
