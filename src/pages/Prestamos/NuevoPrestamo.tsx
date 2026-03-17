@@ -52,7 +52,7 @@ const NuevoPrestamo = () => {
       return;
     }
 
-    if(Number(formData.monto) < 0){
+    if(Number(formData.monto) <= 0){
       toast({ title: "Atención", description: "El monto no puede ser negativo", status: "error" })
       formData.monto = '0'
       return ;
