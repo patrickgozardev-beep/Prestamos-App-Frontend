@@ -6,6 +6,10 @@ import {
     ModalOverlay,
     ModalContent,
     ModalBody,
+    Center,
+    Icon,
+    SkeletonCircle,
+    Skeleton,
 
   } from "@chakra-ui/react";
   import { MagnifyingGlass,Receipt,Info, Plus, CaretLeft, CaretRight, User } from "phosphor-react";
@@ -118,7 +122,7 @@ import type { ClienteDTO } from "../../types/Cliente";
   
           {/* Buscador */}
           <Box px={4} pb={4} bg="white">
-            <InputGroup>
+            <InputGroup marginTop={2}>
               <InputLeftElement pointerEvents="none">
                 <MagnifyingGlass size={20} color="gray" />
               </InputLeftElement>
@@ -137,87 +141,122 @@ import type { ClienteDTO } from "../../types/Cliente";
           <Divider />
   
           {/* Lista de Clientes */}
-          <VStack spacing={1} align="stretch" mt={2}>
-            {clientes.map((cliente) => (
-              <Box 
-                key={cliente.id}
-                p={4} 
-                bg="white" 
-                _active={{ bg: "gray.50" }} 
-                transition="0.2s"
-                cursor="pointer"
-                onClick={() => handleClienteClick(cliente)}
-              >
-                <HStack justifyContent="space-between">
-                  <HStack spacing={3}>
-                    <Box bg="blue.50" p={2} borderRadius="full">
-                      <User size={24} color="#004481" weight="duotone" />
-                    </Box>
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="bold" fontSize="sm" color="gray.700">
-                        {cliente.nombres}
-                      </Text>
-                      <Text fontSize="xs" color="gray.500">
-                        DNI: {cliente.dni}
-                      </Text>
+          <VStack p={4} spacing={4} pb={24} align="stretch">
+            {loading ? (
+              // --- ESTADO: CARGANDO (SKELETONS) ---
+              [1, 2, 3, 4, 5].map((i) => (
+                <Box key={i} p={4} bg="white" borderBottom="1px solid" borderColor="gray.50">
+                  <HStack spacing={3} w="full">
+                    <SkeletonCircle size="10" />
+                    <VStack align="start"  flex={1}>
+                      <Skeleton height="12px" width="60%" borderRadius="full" />
+                      <Skeleton height="10px" width="30%" borderRadius="full" />
                     </VStack>
                   </HStack>
-                  
-                  <HStack spacing={4}>
-                    <VStack align="end" spacing={0}>
-                      <Text fontWeight="bold" fontSize="sm" color="#004481">
-                        {cliente.nombres}
-                      </Text>
-                      <Badge 
-                        colorScheme={cliente.estado === "Mora" ? "red" : "green"} 
-                        variant="subtle" 
-                        fontSize="10px"
-                        borderRadius="full"
-                        px={2}
-                      >
-                        {cliente.estado}
-                      </Badge>
-                    </VStack>
-                    <CaretRight size={16} weight="bold" color="gray.300" />
-                  </HStack>
-                </HStack>
-
-                {/* MODAL PARA INFO O PRESTAMOS */}
-                <Modal isOpen={isOpen} onClose={onClose} isCentered size="xs">
-                <ModalOverlay bg="blackAlpha.400" backdropFilter="blur(4px)" />
-                <ModalContent borderRadius="2xl" mx={4}>
-                  <ModalBody p={0}>
-                    <VStack align="stretch" spacing={0}>
-                      <Box p={5} borderBottom="1px solid" borderColor="gray.100">
-                        <Text fontWeight="900" color="#004481">{selectedCliente?.nombres}</Text>
-                        <Text fontSize="xs" color="gray.500">¿Qué deseas realizar?</Text>
+                </Box>
+              ))
+            ) : clientes.length > 0 ? (
+              // --- ESTADO: CON DATOS ---
+              clientes.map((cliente) => (
+                <Box 
+                  key={cliente.id}
+                  p={4} 
+                  bg="white" 
+                  _active={{ bg: "gray.50" }} 
+                  transition="0.2s"
+                  cursor="pointer"
+                  onClick={() => handleClienteClick(cliente)}
+                  borderBottom="1px solid"
+                  borderColor="gray.50"
+                >
+                  <HStack justifyContent="space-between">
+                    <HStack spacing={3}>
+                      <Box bg="blue.50" p={2} borderRadius="full">
+                        <User size={24} color="#004481" weight="duotone" />
                       </Box>
-                      
-                      <Button 
-                        variant="ghost" justifyContent="start" h="60px" borderRadius="0"
-                        leftIcon={<Receipt size={24} weight="duotone" color="#004481" />}
-                        onClick={() => navigate(`/prestamos?clienteId=${selectedCliente?.id}`)}
-                      >
-                        Ver Préstamos
-                      </Button>
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="bold" fontSize="sm" color="gray.700">
+                          {cliente.nombres}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500">
+                          DNI: {cliente.dni}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                    <CaretRight size={16} color="#CBD5E0" />
+                  </HStack>
+                </Box>
+              ))
+            ) : (
+              <Center flex={1} py={20} w="full">
+              <VStack spacing={4} align="center">
+                <Box 
+                  bg="blue.50" 
+                  p={6} 
+                  borderRadius="full" 
+                  display="flex"          // Asegura comportamiento flex
+                  alignItems="center"     // Centra el icono verticalmente
+                  justifyContent="center"  // Centra el icono horizontalmente
+                  boxSize="110px"         // Forzamos un tamaño cuadrado para que el círculo no se deforme
+                >             
+                  <Icon as={User} boxSize="40px" color="#004481" weight="duotone" />
+                </Box>
+                <VStack spacing={1}>
+                  <Text fontWeight="bold" fontSize="lg" color="gray.700">
+                    {searchTerm ? "Sin resultados" : "No hay clientes"}
+                  </Text>
+                  <Text fontSize="sm" color="gray.500" textAlign="center" px={10}>
+                    {searchTerm 
+                      ? `No encontramos coincidencias para "${searchTerm}"` 
+                      : "Aún no tienes clientes registrados."}
+                  </Text>
+                </VStack>
+              </VStack>
+            </Center>
+            )}
 
-                      <Button 
-                        variant="ghost" justifyContent="start" h="60px" borderRadius="0"
-                        borderBottomRadius="2xl"
-                        leftIcon={<Info size={24} weight="duotone" color="#004481" />}
-                        onClick={() => navigate(`/clientes/detalle/${selectedCliente?.id}`)}
-                      >
-                        Información del Cliente
-                      </Button>
-                    </VStack>
-                  </ModalBody>
-                </ModalContent>
-              </Modal>
-              </Box>
-              
-            ))}
+            
+
+            {/* MODAL (Fuera del loop para mejor rendimiento) */}
+            <Modal isOpen={isOpen} onClose={onClose} isCentered size="xs">
+              <ModalOverlay bg="blackAlpha.400" backdropFilter="blur(4px)" />
+              <ModalContent borderRadius="2xl" mx={4}>
+                <ModalBody p={0}>
+                  <VStack align="stretch" spacing={0}>
+                    <Box p={5} borderBottom="1px solid" borderColor="gray.100">
+                      <Text fontWeight="900" color="#004481" noOfLines={1}>
+                        {selectedCliente?.nombres}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">¿Qué deseas realizar?</Text>
+                    </Box>
+                    
+                    <Button 
+                      variant="ghost" justifyContent="start" h="64px" borderRadius="0"
+                      leftIcon={<Receipt size={24} weight="duotone" color="#004481" />}
+                      onClick={() => {
+                        onClose();
+                        navigate(`/prestamos?clienteId=${selectedCliente?.id}`);
+                      }}
+                    >
+                      Ver Préstamos
+                    </Button>
+
+                    <Button 
+                      variant="ghost" justifyContent="start" h="64px" borderRadius="0"
+                      borderBottomRadius="2xl"
+                      leftIcon={<Info size={24} weight="duotone" color="#004481" />}
+                      onClick={() => {
+                        onClose();
+                        navigate(`/clientes/detalle/${selectedCliente?.id}`);
+                      }}
+                    >
+                      Información del Cliente
+                    </Button>
+                  </VStack>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
           </VStack>
-  
           {/* Botón Flotante para crear cliente (Opcional, muy usado en banca móvil) */}
           <Button
             position="fixed"
