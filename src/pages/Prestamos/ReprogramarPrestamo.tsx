@@ -17,7 +17,7 @@ import CustomSelect from "../../components/CustomSelect";
     const { state } = useLocation();
     const toast = useToast();
     
-    const [cuotas, setCuotas] = useState(1);
+    const [cuotas, setCuotas] = useState(24);
     const [interes, setInteres] = useState("20");
     const [loading, setLoading] = useState(false);
   
