@@ -117,10 +117,17 @@ const Prestamos = () => {
         ) : (
           // ESTADO VACÍO (Si no hay préstamos)
           <Center flex={1} py={20} w="full">
-            <VStack spacing={4}>
-              <Box bg="blue.50" p={6} borderRadius="full">
-                {/* Usamos el icono de Receipt o Folder para indicar ausencia de registros */}
-                <Icon as={Receipt} size={60} color="#004481" weight="duotone" />
+              <VStack spacing={4} align="center">
+                <Box 
+                  bg="blue.50" 
+                  p={6} 
+                  borderRadius="full" 
+                  display="flex"          // Asegura comportamiento flex
+                  alignItems="center"     // Centra el icono verticalmente
+                  justifyContent="center"  // Centra el icono horizontalmente
+                  boxSize="110px"         // Forzamos un tamaño cuadrado para que el círculo no se deforme
+                >
+                <Icon as={Receipt} boxSize="40px" color="#004481" weight="duotone" />
               </Box>
               <VStack spacing={1}>
                 <Text fontWeight="bold" fontSize="lg" color="gray.700">
