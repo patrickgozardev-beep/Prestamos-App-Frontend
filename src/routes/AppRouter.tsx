@@ -22,7 +22,6 @@ const AppRouter = () => {
       <Routes>
         {renderRoutes(publicRoutes)}
         {renderRoutes(privateRoutes)}
-        {/* Redirección global si la ruta no existe */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
