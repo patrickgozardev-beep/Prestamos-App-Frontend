@@ -24,24 +24,24 @@ const NuevoPrestamo = () => {
     fechaInicio: new Date().toISOString().split('T')[0],
     cantidadCuotas: "",
   });
-
+  const fetchClientes = async () => {
+    try {
+      setLoadingClientes(true);
+      const data = await clienteService.listarTodos();  
+      const options = data.map((c: any) => ({ 
+        value: c.id.toString(), 
+        label: c.nombres 
+      }));
+      setClientesOptions(options);
+    } catch (error) {
+      console.error("Error cargando clientes", error);
+    } finally {
+      setLoadingClientes(false);
+    }
+  };
   // Cargar clientes desde el backend si no viene filtrado
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        setLoadingClientes(true);
-        const data = await clienteService.listarTodos(); // Asegúrate de tener este método
-        const options = data.map((c: any) => ({ 
-          value: c.id.toString(), 
-          label: c.nombres 
-        }));
-        setClientesOptions(options);
-      } catch (error) {
-        console.error("Error cargando clientes", error);
-      } finally {
-        setLoadingClientes(false);
-      }
-    };
+
     fetchClientes();
   }, []);
 
@@ -50,6 +50,12 @@ const NuevoPrestamo = () => {
     if (!formData.clienteId || !formData.monto || !formData.tipoPrestamoId) {
       toast({ title: "Atención", description: "Completa los campos obligatorios", status: "warning" });
       return;
+    }
+
+    if(Number(formData.monto) < 0){
+      toast({ title: "Atención", description: "El monto no puede ser negativo", status: "error" })
+      formData.monto = '0'
+      return ;
     }
 
     setIsSubmitting(true);
