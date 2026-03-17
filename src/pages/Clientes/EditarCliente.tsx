@@ -132,7 +132,6 @@ import {
       try {
         const clienteEditado: any = {
           ...formData,
-          usuario: { id: 1 } // Mantener el vínculo con el usuario
         };
   
         await clienteService.actualizar(Number(id), clienteEditado);
