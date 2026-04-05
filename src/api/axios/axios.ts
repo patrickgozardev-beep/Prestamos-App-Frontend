@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   //baseURL: "http://localhost:8080/api",
-  baseURL: import.meta.env.VITE_API_URL ||"https://prestamos-app-backend-production-71e2.up.railway.app/api",  
+  baseURL: import.meta.env.VITE_API_URL ||"https://prestamos-app-backend.onrender.com/api",  
   withCredentials: true,
 });
 
@@ -12,7 +12,7 @@ api.interceptors.request.use(
     // Recuperamos el token del localStorage
     const token = localStorage.getItem("token");
 
-    // Si el token existe, lo añadimos al header Authorization
+    // Si el token existe, lo aña dimos al header Authorization
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
