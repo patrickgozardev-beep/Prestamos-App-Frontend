@@ -22,6 +22,22 @@ import CustomSelect from "../../components/CustomSelect";
     const [loading, setLoading] = useState(false);
   
     const handleReprogramar = async () => {
+      if (cuotas > 36) {
+        toast({
+          title: "Límite excedido",
+          description: `No puedes reprogramar a más de 36 cuotas.`,
+          status: "warning",
+        });
+        return;
+      }
+      if (cuotas < 1) {
+        toast({
+          title: "Límite excedido",
+          description: `No puedes reprogramar a menos de 1 cuota.`,
+          status: "warning",
+        });
+        return;
+      }
       try {
         setLoading(true);
         // Tu endpoint de Spring Boot
@@ -79,8 +95,7 @@ import CustomSelect from "../../components/CustomSelect";
                 <Text fontWeight="bold" color="gray.700">¿En cuántas cuotas nuevas deseas dividir el saldo?</Text>
                 
                 <NumberInput 
-                  min={1} 
-                  max={60} 
+              
                   value={cuotas} 
                   onChange={(val) => setCuotas(Number(val))}
                   size="lg"

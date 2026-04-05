@@ -46,40 +46,92 @@ const NuevoPrestamo = () => {
   }, []);
 
   const handleConfirmar = async () => {
-    // Validaciones básicas
-    if (!formData.clienteId || !formData.monto || !formData.tipoPrestamoId) {
-      toast({ title: "Atención", description: "Completa los campos obligatorios", status: "warning" });
+    // 1. Extraer valores para validar limpiamente
+    const montoNum = Number(formData.monto);
+    const cuotasNum = Number(formData.cantidadCuotas);
+    const interesNum = Number(formData.interesPorcentaje);
+  
+    // 2. Validación de campos obligatorios
+    if (!formData.clienteId || !formData.monto || !formData.tipoPrestamoId || !formData.cantidadCuotas) {
+      toast({ 
+        title: "Campos incompletos", 
+        description: "Por favor, completa todos los datos del préstamo.", 
+        status: "warning",
+        duration: 3000,
+        isClosable: true
+      });
+      return;
+    }
+  
+    // 3. Validación de Monto (Mínimo 100 soles)
+    if (montoNum < 100) {
+      toast({ 
+        title: "Monto inválido", 
+        description: "El monto mínimo para un préstamo es de S/ 100.00", 
+        status: "error",
+        duration: 4000,
+        isClosable: true
+      });
       return;
     }
 
-    if(Number(formData.monto) <= 0){
-      toast({ title: "Atención", description: "El monto debe ser positivo y mayor a 0", status: "error" })
-      formData.monto = '0'
-      return ;
+    if (montoNum > 10000) {
+      toast({ 
+        title: "Monto inválido", 
+        description: "El monto maximo para un préstamo es de S/ 10,000.00", 
+        status: "error",
+        duration: 4000,
+        isClosable: true
+      });
+      return;
     }
-
+  
+  
+    // 4. Validación de Cuotas (Máximo 36)
+    if (cuotasNum <= 0 || cuotasNum > 36) {
+      toast({ 
+        title: "Cuotas no permitidas", 
+        description: "La cantidad de cuotas debe estar entre 1 y 36.", 
+        status: "error",
+        duration: 4000,
+        isClosable: true
+      });
+      return;
+    }
+  
+    // 5. Proceder con el envío
     setIsSubmitting(true);
     try {
       const dto = {
         ...formData,
         clienteId: Number(formData.clienteId),
         tipoPrestamoId: Number(formData.tipoPrestamoId),
-        monto: Number(formData.monto),
-        interesPorcentaje: Number(formData.interesPorcentaje),
-        cantidadCuotas: Number(formData.cantidadCuotas),
+        monto: montoNum,
+        interesPorcentaje: interesNum,
+        cantidadCuotas: cuotasNum,
       };
-
-      // Llamada al servicio según tipo
+  
       if (formData.tipoPrestamoId === "1") {
         await prestamoService.crearDiario(dto);
       } else {
         await prestamoService.crearSemanal(dto);
       }
-
-      toast({ title: "¡Éxito!", description: "Préstamo creado correctamente", status: "success" });
+  
+      toast({ 
+        title: "¡Préstamo Registrado!", 
+        description: `Se ha creado el préstamo por S/ ${montoNum} con éxito.`, 
+        status: "success",
+        duration: 3000
+      });
+      
       navigate("/prestamos", { replace: true });
     } catch (error) {
-      toast({ title: "Error", description: "No se pudo crear el préstamo", status: "error" });
+      console.error(error);
+      toast({ 
+        title: "Error de registro", 
+        description: "Hubo un problema al conectar con el servidor. Intenta de nuevo.", 
+        status: "error" 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -121,6 +173,7 @@ const NuevoPrestamo = () => {
               <InputLeftAddon children="S/" color="#004481" fontWeight="bold" fontSize="lg" pr={2} bg="transparent" />
               <Input 
                 type="number" 
+                min={100}
                 placeholder="0.00" 
                 value={formData.monto}
                 onChange={(e) => setFormData({...formData, monto: e.target.value})}
@@ -143,6 +196,8 @@ const NuevoPrestamo = () => {
                 <Input 
                     variant="unstyled" 
                     type="number"
+                    min={1}
+                    max={36} 
                     h="40px"
                     value={formData.cantidadCuotas}
                     onChange={(e) => setFormData({...formData, cantidadCuotas: e.target.value})}

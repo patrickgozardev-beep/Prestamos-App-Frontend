@@ -5,10 +5,15 @@ import {
     Modal,
     ModalOverlay,
     ModalContent,
-    ModalBody
+    ModalBody,
+    TabPanel,
+    TabPanels,
+    TabList,
+    Tab,
+    Tabs
   } from "@chakra-ui/react";
-  import { CaretLeft, CheckCircle, Clock, CurrencyDollar, CalendarBlank, MapPin, House, Gear, ArrowsClockwise, Trash, WhatsappLogo } from "phosphor-react";
-  import { replace, useNavigate, useParams } from "react-router-dom";
+  import { CaretLeft, CheckCircle, Clock, House, Gear, ArrowsClockwise, Trash, WhatsappLogo } from "phosphor-react";
+  import { useNavigate, useParams } from "react-router-dom";
   import { useEffect, useState } from "react";
   import MainLayout from "../../layouts/MainLayout";
   import prestamoService from "../../api/prestamoService"; // Asumiendo que existe
@@ -16,7 +21,7 @@ import type { PrestamoDetalleDTO } from "../../types/Prestamo";
 import type { CronogramaDTO } from "../../types/CronogramaPago";
 import cronogramaService from "../../api/cronogramaPagoService";
 import LoadingScreen from "../../components/shared/LoadingScreenDetallePrestamo";
-import { formatearFecha } from "../../utils/funciones";
+import { CuotaCard } from "../../components/CuotaCard";
   
   const DetallePrestamo = () => {
     const { id } = useParams();
@@ -38,11 +43,8 @@ import { formatearFecha } from "../../utils/funciones";
           cronogramaService.listarPorPrestamo(Number(id))
         ]);
     
-        // --- LÓGICA DE ORDENAMIENTO REFINADA ---
         const cronogramaOrdenado = [...dataCronograma].sort((a, b) => {
-          // Definimos la prioridad de "Urgencia"
-          // 1: Lo que hay que cobrar (Atrasados, Pendientes, Parciales)
-          // 2: Lo que ya terminó (Pagados, Inactivos)
+
           const obtenerGrupo = (estado: string) => {
             if (['ATRASADO', 'PENDIENTE', 'PARCIAL'].includes(estado)) return 1;
             return 2; // PAGADO e INACTIVO van al fondo
@@ -106,7 +108,7 @@ import { formatearFecha } from "../../utils/funciones";
       }
     };
 
-    
+    const cuotaProxima = cronogramas.find(c => ['PENDIENTE', 'ATRASADO', 'PARCIAL'].includes(c.estado));
     return (
       <MainLayout>
         <VStack spacing={0} align="stretch" bg="gray.50" minH="100vh" w="full">
@@ -141,6 +143,7 @@ import { formatearFecha } from "../../utils/funciones";
                 aria-label="Ir al inicio"              />
             </Flex>
           </Flex>
+
           <Modal isOpen={isOpen} onClose={onClose} isCentered size="xs">
             <ModalOverlay bg="blackAlpha.400" backdropFilter="blur(4px)" />
             <ModalContent borderRadius="2xl" mx={4}>
@@ -151,6 +154,7 @@ import { formatearFecha } from "../../utils/funciones";
                     <Text fontSize="xs" color="gray.500">¿Qué deseas realizar con este crédito?</Text>
                   </Box>
                   {/* Opción 1: Enviar mensaje */}
+                  {prestamo.estado !== 'REPROGRAMADO' && (
                   <Button 
                     variant="ghost" justifyContent="start" h="65px" borderRadius="0"
                     borderBottomRadius="2xl"
@@ -162,7 +166,10 @@ import { formatearFecha } from "../../utils/funciones";
                   >
                     Enviar mensaje detallado
                   </Button>
-                  {/* Opción 1: Reprogramar */}
+                  )}
+
+                  {/* Opción 2: Reprogramar */}
+                  {prestamo.estado !== 'REPROGRAMADO' && (
                   <Button 
                     variant="ghost" 
                     justifyContent="start" 
@@ -181,8 +188,8 @@ import { formatearFecha } from "../../utils/funciones";
                   >
                     Reprogramar préstamo
                   </Button>
-
-                  {/* Opción 2: Eliminar (Redirige a componente nuevo) */}
+                  )}
+                  {/* Opción 3: Eliminar (Redirige a componente nuevo) */}
                   <Button 
                     variant="ghost" justifyContent="start" h="65px" borderRadius="0"
                     borderBottomRadius="2xl"
@@ -280,84 +287,77 @@ import { formatearFecha } from "../../utils/funciones";
         </Box>
   
           {/* Cronograma de Pagos */}
-          <VStack align="stretch" p={4} spacing={3} pb={24}>
-            <Text fontWeight="bold" fontSize="md" color="gray.700" mb={1}>Cronograma de Pagos</Text>
-            
-          {cronogramas.map((cuota) => {
-            const props = getBadgeProps(cuota.estado);
-            return (
-              <Box 
-                key={cuota.id} 
-                bg="white" 
-                p={4} 
-                borderRadius="xl" 
-                shadow="sm"
-                onClick={() => {
-                  if (cuota.estado === 'PAGADO' || cuota.estado === 'PARCIAL') {
-                    navigate(`/pago/cronograma/${cuota.id}`, { 
-                      state: { numeroCuota: cuota.numeroCuota } 
-                    });
-                  }
-                }}
-                cursor={(cuota.estado === 'PAGADO' || cuota.estado === 'PARCIAL') ? "pointer" : "default"}
-                _hover={(cuota.estado === 'PAGADO' || cuota.estado === 'PARCIAL') ? { bg: "gray.50" } : {}}
+          <Box px={4} py={2}> {/* El mt negativo es para "subir" un poco el tab sobre el fondo si quieres */}
+          <Tabs isFitted variant="soft-rounded" colorScheme="blue">
+            <TabList bg="white" p={1} borderRadius="xl" shadow="sm">
+              <Tab 
+                fontSize="sm" 
+                fontWeight="bold" 
+                _selected={{ color: "white", bg: "#004481" }}
               >
-                <HStack justifyContent="space-between">
-                  <HStack spacing={3}>
-                    <Center bg={props.bg} p={2} borderRadius="lg">
-                      {cuota.estado === 'PAGADO' ? (
-                        <CheckCircle size={24} color={props.iconColor} weight="fill" />
-                      ) : (
-                        <Clock size={24} color={props.iconColor} weight="fill" />
-                      )}
-                    </Center>
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="bold" fontSize="sm">Cuota {cuota.numeroCuota}</Text>
-                      <Text fontSize="xs" color="gray.500">Vence: {formatearFecha(cuota.fechaVencimiento)}</Text>
-                    </VStack>
-                  </HStack>
+                PRÓXIMO COBRO
+              </Tab>
+              <Tab 
+                fontSize="sm" 
+                fontWeight="bold" 
+                _selected={{ color: "white", bg: "#004481" }}
+              >
+                CUOTAS
+              </Tab>
+            </TabList>
 
-                  <VStack align="end" spacing={0}>
-                    <Text fontWeight="900" fontSize="md" color="#004481">
-                      S/ {cuota.monto.toFixed(2)}
+            <TabPanels>
+              {/* TAB 1: PRÓXIMO PAGO (ENFOQUE RÁPIDO) */}
+              <TabPanel px={0} py={4}>
+                {cuotaProxima ? (
+                  <VStack align="stretch" spacing={3}>
+                    <Text fontWeight="bold" fontSize="xs" color="gray.500" ml={1}>
+                      CUOTA POR COBRAR AHORA
                     </Text>
-                    <Badge fontSize="9px" colorScheme={props.color} variant="subtle">
-                      {cuota.estado}
-                    </Badge>
+                    {/* Renderizamos solo la card de la cuota próxima */}
+                    <CuotaCard 
+                      cuota={cuotaProxima} 
+                      prestamo={prestamo} 
+                      navigate={navigate} 
+                      getBadgeProps={getBadgeProps} 
+                    />
+                    <Box p={4} bg="blue.50" borderRadius="xl" border="1px dashed" borderColor="blue.200">
+                       <Text fontSize="xs" color="blue.700" textAlign="center">
+                         Al finalizar este cobro, el sistema habilitará automáticamente la siguiente cuota.
+                       </Text>
+                    </Box>
                   </VStack>
-                </HStack>
-
-                {/* Botón de Pago: Solo si tiene saldo pendiente */}
-                {cuota.estado !== 'PAGADO' && cuota.estado!=='INACTIVO' && (
-                  <Button 
-                    mt={3} 
-                    size="sm" 
-                    w="full" 
-                    colorScheme="blue" 
-                    variant="outline"
-                    leftIcon={<CurrencyDollar weight="bold" />}
-                    borderRadius="lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/pago/nuevo/${cuota.id}`, { 
-                        state: { 
-                          montoSugerido: cuota.monto - cuota.montoPagado, 
-                          numeroCuota: cuota.numeroCuota,
-                          clienteNombre: prestamo.cliente?.nombres,
-                          prestamoId: prestamo.id 
-                        }
-                      });
-                    }}
-                  >
-                    Registrar Cobro
-                  </Button>
+                ) : (
+                  <Center py={10} flexDirection="column">
+                    <CheckCircle size={48} weight="fill" color="#38A169" />
+                    <Text mt={2} fontWeight="bold" color="gray.600">¡Préstamo finalizado!</Text>
+                    <Text fontSize="xs" color="gray.500">No hay cuotas pendientes por cobrar.</Text>
+                  </Center>
                 )}
-              </Box>
-            );
-          })}
+              </TabPanel>
+
+              {/* TAB 2: LISTADO DE TODAS LAS CUOTAS */}
+              <TabPanel px={0} py={4}>
+                <VStack align="stretch" spacing={3} pb={24}>
+                  <Text fontWeight="bold" fontSize="xs" color="gray.500" ml={1}>
+                    HISTORIAL COMPLETO ({cronogramas.length})
+                  </Text>
+                  {cronogramas.map((cuota) => (
+                    <CuotaCard 
+                      key={cuota.id}
+                      cuota={cuota} 
+                      prestamo={prestamo} 
+                      navigate={navigate} 
+                      getBadgeProps={getBadgeProps} 
+                    />
+                  ))}
+                </VStack>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Box>
           </VStack>
   
-        </VStack>
       </MainLayout>
     );
   };

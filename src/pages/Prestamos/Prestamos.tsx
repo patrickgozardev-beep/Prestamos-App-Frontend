@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { VStack, Text, Box, Flex, Badge, HStack, Button, Spacer, Spinner, Center, IconButton, Icon } from "@chakra-ui/react";
+import { VStack, Text, Box, Flex, Badge, HStack, Button, Spacer, Spinner, Center, IconButton, Icon, Skeleton } from "@chakra-ui/react";
 import { CaretLeft, House, Plus, Receipt } from "phosphor-react";
 import MainLayout from "../../layouts/MainLayout";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -72,12 +72,37 @@ const Prestamos = () => {
           </Box>
         )}
 
-        <VStack p={4} spacing={4} pb={24}>
-        {loading ? (
-          <Center h="200px">
-            <Spinner color="#004481" size="xl" thickness="4px" />
-          </Center>
-        ) : prestamos.length > 0 ? (
+      <VStack p={4} spacing={4} pb={24}>
+          {loading ? (
+            // --- NUEVO ESTADO DE CARGA CON SKELETONS ---
+            [1, 2, 3, 4].map((i) => (
+              <Box 
+                key={i} 
+                w="full" 
+                p={5} 
+                bg="white" 
+                borderRadius="2xl" 
+                border="1px solid" 
+                borderColor="gray.100"
+                shadow="sm"
+              >
+                <HStack justifyContent="space-between" mb={4}>
+                  <Skeleton height="18px" width="70px" borderRadius="full" />
+                  <Skeleton height="12px" width="50px" borderRadius="full" />
+                </HStack>
+                
+                <Skeleton height="32px" width="140px" mb={4} borderRadius="md" />
+                
+                <HStack justifyContent="space-between">
+                  <VStack align="start" spacing={2} flex={1}>
+                    <Skeleton height="12px" width="80%" borderRadius="full" />
+                    <Skeleton height="10px" width="40%" borderRadius="full" />
+                  </VStack>
+                  <Skeleton height="12px" width="60px" borderRadius="full" />
+                </HStack>
+              </Box>
+            ))
+          ) : prestamos.length > 0 ? (
           // LISTA DE PRÉSTAMOS (Si existen)
           prestamos.map((p) => (
             <Box 
