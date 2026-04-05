@@ -7,23 +7,29 @@ import {
   FormLabel, 
   Box,
   Center,
-  useToast
+  useToast,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody
 } from "@chakra-ui/react";
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import authService from "../api/authService";
-import PinKeyboard from "../components/PinKeyboard";
+import publicService from "../api/axios/publicService";
+import { Spinner } from "phosphor-react";
 
 const Login = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // 1. Estados para capturar las credenciales
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [pinReset, setPinReset] = useState(0);
 
   // 2. Función de login conectada al backend
   const handleLogin = async (e?: React.FormEvent) => {
@@ -63,7 +69,6 @@ const Login = () => {
       const mensajeError = error.response?.data?.message || 
                            error.response?.data || 
                            "Usuario o contraseña incorrectos";
-      setPinReset(prev => prev + 1);
       toast({
         title: "Error de acceso",
         description: mensajeError,
@@ -77,8 +82,61 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    let isMounted = true;
+    
+    // Timer para mostrar el modal solo si hay demora (800ms)
+    const timer = setTimeout(() => {
+      if (isMounted) onOpen();
+    }, 800); 
+  
+    const wakeUp = async () => {
+      try {
+        // Usamos el método del servicio
+        await publicService.checkHealth();
+        console.log("Servidor listo y operando.");
+      } catch (error) {
+        console.warn("El servidor está tardando en responder (encendiéndose)...");
+      } finally {
+        if (isMounted) {
+          clearTimeout(timer);
+          onClose();
+        }
+      }
+    };
+  
+    wakeUp();
+  
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [onOpen, onClose]);
+
   return (
     <MainLayout>
+
+      <Modal isOpen={isOpen} onClose={() => {}} isCentered closeOnOverlayClick={false}>
+        <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(5px)" />
+        <ModalContent bg="transparent" shadow="none">
+          <ModalBody>
+            <VStack spacing={6}>
+              <Spinner speed="0.65s"  color="#004481" size="xl" />
+              <Box bg="white" p={6} borderRadius="md" textAlign="center" shadow="xl">
+                <Text fontWeight="900" color="#004481" fontSize="lg" mb={2}>
+                  DESPERTANDO EL SISTEMA
+                </Text>
+                <Text color="gray.600" fontSize="sm">
+                  Estamos encendiendo los motores en la nube. <br/> 
+                  Esto tardará solo unos segundos...
+                </Text>
+              </Box>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+
       <Box 
         p={8} 
         bg="white"

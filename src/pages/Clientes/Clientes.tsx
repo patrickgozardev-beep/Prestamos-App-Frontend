@@ -157,17 +157,22 @@ import type { ClienteDTO } from "../../types/Cliente";
               ))
             ) : clientes.length > 0 ? (
               // --- ESTADO: CON DATOS ---
+        
+
               clientes.map((cliente) => (
                 <Box 
                   key={cliente.id}
-                  p={4} 
-                  bg="white" 
+                  p={5} 
+                  bg="white"
+                  shadow="sm" 
+                  borderRadius="2xl" 
+                  border="1px solid" 
+                  borderColor="gray.100"
                   _active={{ bg: "gray.50" }} 
                   transition="0.2s"
                   cursor="pointer"
                   onClick={() => handleClienteClick(cliente)}
-                  borderBottom="1px solid"
-                  borderColor="gray.50"
+                  
                 >
                   <HStack justifyContent="space-between">
                     <HStack spacing={3}>

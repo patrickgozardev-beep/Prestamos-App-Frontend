@@ -1,9 +1,15 @@
 import { 
   VStack, Text, Box, HStack, Circle, Flex, Spacer, 
   Button, SimpleGrid, useToast,
-  Center
+  Center,
+  Menu,
+  MenuButton,
+  Avatar,
+  Portal,
+  MenuList,
+  MenuItem
 } from "@chakra-ui/react";
-import { Users, Coins, SignOut, CaretRight, Bell, CalendarBlank } from "phosphor-react";
+import { Users, Coins, SignOut, CaretRight, Bell, CalendarBlank, User, Gear } from "phosphor-react";
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -71,17 +77,64 @@ const loadDashboardData = async () => {
       <VStack spacing={6} align="stretch" w="full" pb={10}>
         
         {/* Superior: Saludo y Notificaciones */}
-        <Flex align="center" px={2}>
+        <Flex align="center" px={2} pt={2}>
           <Box>
-            <Text fontSize="sm" color="gray.500">Hola, </Text>
-            <Text fontSize="xl" fontWeight="900" color="#004481">{userName}</Text>
+            <Text fontSize="xs" color="gray.500" fontWeight="medium">Hola,</Text>
+            <Text fontSize="xl" fontWeight="900" color="#004481" lineHeight="1.1">
+              {userName}
+            </Text>
           </Box>
+          
           <Spacer />
-          <HStack spacing={4}>
-            <Bell size={24} color="#004481" weight="bold" />
-            <Circle size="40px" bg="blue.50">
-              <Text fontWeight="bold" color="#004481">S</Text>
-            </Circle>
+
+          <HStack spacing={3}>
+            {/* Botón de Notificaciones con Indicador */}
+            <Box position="relative" cursor="pointer" onClick={() => navigate("/prestamos")}>
+              <Bell size={26} color="#004481" weight="duotone" />
+              {proximos.length > 0 && (
+                <Circle 
+                  size="10px" bg="red.500" position="absolute" 
+                  top="-2px" right="-2px" border="2px solid white" 
+                />
+              )}
+            </Box>
+
+            {/* Menú de Perfil Desplegable */}
+            <Menu isLazy>
+              <MenuButton>
+                <Avatar 
+                  size="sm" 
+                  name={userName} 
+                  bg="blue.50" 
+                  color="#004481" 
+                  fontWeight="bold"
+                  cursor="pointer"
+                  border="1px solid"
+                  borderColor="blue.100"
+                />
+              </MenuButton>
+              <Portal>
+                <MenuList borderRadius="xl" shadow="lg" py={2}>
+                  <Box px={4} py={2} borderBottom="1px solid" borderColor="gray.100" mb={2}>
+                    <Text fontWeight="bold" fontSize="sm" color="#004481">{userName}</Text>
+                    <Text fontSize="xs" color="gray.500">Administrador</Text>
+                  </Box>
+                  <MenuItem icon={<User size={18} />} onClick={() => navigate("/perfil")}>
+                    Mi Perfil
+                  </MenuItem>
+                  <MenuItem icon={<Gear size={18} />}>
+                    Configuración
+                  </MenuItem>
+                  <MenuItem 
+                    icon={<SignOut size={18} />} 
+                    color="red.500" 
+                    onClick={() => { localStorage.clear(); navigate("/"); }}
+                  >
+                    Cerrar Sesión
+                  </MenuItem>
+                </MenuList>
+              </Portal>
+            </Menu>
           </HStack>
         </Flex>
 
@@ -251,13 +304,6 @@ const loadDashboardData = async () => {
             </Center>
           )}
         </Box>
-
-        <Button 
-          variant="ghost" leftIcon={<SignOut size={20} />} colorScheme="red" size="sm" mt={10}
-          onClick={() => { localStorage.clear(); navigate("/"); }}
-        >
-          Cerrar Sesión Segura
-        </Button>
 
       </VStack>
     </MainLayout>
